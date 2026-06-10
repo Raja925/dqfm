@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DQF-M Scorer — Documentation Quality Framework for Manufacturing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+/* ── Reset ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --white:#FFFFFF;--slate:#1C2B3A;--slate-mid:#2E4057;--slate-lt:#637285;
+  --terra:#C0784A;--terra-dim:#F5E6D8;--terra-dk:#96552E;
+  --stone:#F4F6F8;--stone2:#EDF0F3;--border:#E2E6EA;--border-dk:#CBD1D8;
+  --green:#1A7A4A;--green-lt:#E8F5EE;--amber:#B45309;--amber-lt:#FEF3C7;
+  --red:#C0392B;--red-lt:#FDECEB;
+  --confirmed:#1A7A4A;--partial:#B45309;--absent:#C0392B;
+  --serif:"DM Serif Display",Georgia,serif;
+  --sans:"Inter",system-ui,sans-serif;
+  --r:10px;--rsm:6px;--shadow:0 1px 3px rgba(28,43,58,.08),0 1px 8px rgba(28,43,58,.04);
+  --shadow-md:0 4px 16px rgba(28,43,58,.10),0 1px 4px rgba(28,43,58,.06);
+}
+html,body{height:100%;font-family:var(--sans);background:var(--white);color:var(--slate);overflow:hidden;display:flex;flex-direction:column}
+
+/* ── Progress bar ── */
+.prog-bar{height:3px;background:var(--stone2);flex-shrink:0}
+.prog-fill{height:100%;background:var(--terra);transition:width .4s ease;width:0%}
+
+/* ── Top bar ── */
+.topbar{display:flex;align-items:center;gap:16px;padding:0 28px;height:56px;flex-shrink:0;border-bottom:1px solid var(--border);background:var(--white)}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-mark{width:32px;height:32px;border-radius:8px;background:var(--terra);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:14px;color:#fff;flex-shrink:0;letter-spacing:-.5px}
+.logo-name{font-family:var(--serif);font-size:17px;color:var(--slate)}
+.logo-sub{font-size:10px;color:var(--slate-lt);margin-top:1px;letter-spacing:.01em}
+.spacer{flex:1}
+.step-indicator{font-size:12px;color:var(--slate-lt);font-weight:500}
+.tool-chip{display:none;align-items:center;gap:6px;background:var(--terra-dim);border:1px solid rgba(192,120,74,.3);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--terra-dk);font-weight:500}
+.tool-chip.show{display:flex}
+.chip-dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
+.btn-ghost{font-size:12px;color:var(--slate-lt);background:none;border:1px solid var(--border);border-radius:var(--rsm);padding:6px 14px;cursor:pointer;font-family:var(--sans);font-weight:500;transition:all .18s}
+.btn-ghost:hover{color:var(--slate);border-color:var(--border-dk)}
+
+/* ── Screens ── */
+.screen{display:none;flex:1;overflow:hidden}
+.screen.active{display:flex}
+
+/* ── WELCOME SCREEN ── */
+#s-welcome{flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;background:var(--white);overflow-y:auto}
+.welcome-inner{max-width:580px;width:100%;text-align:center}
+.welcome-eyebrow{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--terra);margin-bottom:16px}
+.welcome-title{font-family:var(--serif);font-size:38px;line-height:1.15;color:var(--slate);margin-bottom:14px}
+.welcome-sub{font-size:15px;color:var(--slate-lt);line-height:1.65;margin-bottom:36px}
+.heuristic-pills{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:36px}
+.h-pill{font-size:11px;font-weight:500;padding:5px 12px;border-radius:20px;background:var(--stone);color:var(--slate-mid);border:1px solid var(--border)}
+.h-pill span{color:var(--terra);font-weight:600;margin-right:4px}
+.context-form{text-align:left;background:var(--stone);border:1px solid var(--border);border-radius:var(--r);padding:24px;margin-bottom:24px}
+.form-title{font-size:13px;font-weight:600;color:var(--slate);margin-bottom:16px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.form-row.full{grid-template-columns:1fr}
+.field label{display:block;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--slate-lt);margin-bottom:5px}
+.field input,.field select,.field textarea{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:var(--rsm);font-family:var(--sans);font-size:13px;color:var(--slate);background:var(--white);outline:none;transition:border-color .2s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--terra)}
+.field textarea{resize:vertical;min-height:64px}
+.tool-entry{background:var(--stone);border:1px solid var(--border);border-radius:var(--r);padding:24px;margin-bottom:24px}
+.tool-entry .field{margin-bottom:12px}
+.tool-entry .field:last-child{margin-bottom:0}
+.upload-area{border:2px dashed var(--border-dk);border-radius:var(--rsm);padding:20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--white)}
+.upload-area:hover,.upload-area.drag{border-color:var(--terra);background:var(--terra-dim)}
+.upload-area p{font-size:13px;color:var(--slate-lt);margin-top:6px}
+.upload-area strong{font-size:13px;color:var(--slate);display:block}
+.upload-icon{font-size:28px;margin-bottom:4px}
+.preview-grid{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.preview-thumb{position:relative;width:80px;height:60px;border-radius:4px;overflow:hidden;border:1px solid var(--border)}
+.preview-thumb img{width:100%;height:100%;object-fit:cover}
+.preview-thumb button{position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(28,43,58,.7);color:#fff;border:none;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center}
+.cta-btn{width:100%;padding:14px;background:var(--terra);color:#fff;border:none;border-radius:var(--r);font-family:var(--sans);font-size:15px;font-weight:600;cursor:pointer;transition:all .18s;letter-spacing:.01em}
+.cta-btn:hover{background:var(--terra-dk);transform:translateY(-1px);box-shadow:var(--shadow-md)}
+.cta-btn:disabled{opacity:.4;cursor:default;transform:none;box-shadow:none}
+
+/* ── HEURISTIC SCREEN ── */
+#s-heuristic{flex-direction:row;overflow:hidden}
+.h-left{width:340px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;background:var(--stone);overflow-y:auto}
+.h-nav{padding:20px}
+.h-nav-title{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--slate-lt);margin-bottom:12px}
+.h-nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--rsm);margin-bottom:2px;cursor:pointer;transition:background .15s}
+.h-nav-item:hover{background:var(--stone2)}
+.h-nav-item.active{background:var(--white);box-shadow:var(--shadow)}
+.h-nav-item.done .nav-status{background:var(--green);color:#fff}
+.h-nav-code{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;background:var(--stone2);color:var(--slate-lt);flex-shrink:0;transition:all .2s}
+.h-nav-item.active .h-nav-code{background:var(--terra);color:#fff}
+.h-nav-item.done .h-nav-code{background:var(--green);color:#fff}
+.h-nav-info{flex:1;min-width:0}
+.h-nav-name{font-size:12px;font-weight:600;color:var(--slate);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.h-nav-score{font-size:11px;color:var(--slate-lt);margin-top:1px}
+.h-nav-bar{height:3px;background:var(--border);border-radius:2px;margin-top:4px;overflow:hidden}
+.h-nav-bar-fill{height:100%;border-radius:2px;transition:width .4s ease}
+.h-screenshot{padding:16px 20px;border-top:1px solid var(--border)}
+.h-screenshot-title{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--slate-lt);margin-bottom:8px}
+.screenshot-thumbs{display:flex;gap:6px;flex-wrap:wrap}
+.ss-thumb{width:72px;height:52px;border-radius:4px;overflow:hidden;border:1px solid var(--border);cursor:pointer;transition:border-color .2s}
+.ss-thumb:hover,.ss-thumb.selected{border-color:var(--terra);border-width:2px}
+.ss-thumb img{width:100%;height:100%;object-fit:cover}
+.no-screenshots{font-size:12px;color:var(--slate-lt);font-style:italic}
+
+.h-right{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.h-content{flex:1;overflow-y:auto;padding:32px 36px}
+.h-eyebrow{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--terra);margin-bottom:8px}
+.h-title{font-family:var(--serif);font-size:26px;color:var(--slate);margin-bottom:4px}
+.h-theory{font-size:12px;color:var(--slate-lt);margin-bottom:6px;font-style:italic}
+.h-question{font-size:14px;color:var(--slate-mid);line-height:1.6;margin-bottom:28px;padding:14px 16px;background:var(--stone);border-left:3px solid var(--terra);border-radius:0 var(--rsm) var(--rsm) 0}
+.h-score-display{display:flex;align-items:center;gap:16px;margin-bottom:28px;padding:16px 20px;background:var(--stone);border-radius:var(--r);border:1px solid var(--border)}
+.h-score-num{font-family:var(--serif);font-size:48px;line-height:1;color:var(--slate)}
+.h-score-meta{flex:1}
+.h-score-label{font-size:12px;font-weight:600;color:var(--slate-lt);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.h-score-bar-bg{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.h-score-bar-fill{height:100%;border-radius:3px;transition:width .5s ease,background .3s}
+.h-score-verdict{font-size:12px;font-weight:600;margin-top:6px}
+.criteria-section{margin-bottom:24px}
+.criteria-title{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--slate-lt);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.criterion{display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-bottom:1px solid var(--stone2)}
+.criterion:last-child{border-bottom:none}
+.criterion-text{flex:1}
+.criterion-label{font-size:13px;font-weight:500;color:var(--slate);margin-bottom:3px}
+.criterion-desc{font-size:12px;color:var(--slate-lt);line-height:1.5}
+.criterion-weight{font-size:10px;color:var(--slate-lt);margin-top:3px}
+.toggle-group{display:flex;flex-direction:column;gap:4px;flex-shrink:0;width:100px}
+.toggle-btn{padding:5px 8px;border-radius:5px;border:1.5px solid var(--border);background:var(--white);font-size:11px;font-weight:600;cursor:pointer;font-family:var(--sans);transition:all .15s;text-align:center;color:var(--slate-lt)}
+.toggle-btn:hover{border-color:var(--border-dk)}
+.toggle-btn.confirmed{background:var(--green-lt);border-color:var(--green);color:var(--green)}
+.toggle-btn.partial{background:var(--amber-lt);border-color:var(--amber);color:var(--amber)}
+.toggle-btn.absent{background:var(--red-lt);border-color:var(--red);color:var(--red)}
+.notes-area{margin-top:20px}
+.notes-area label{font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--slate-lt);display:block;margin-bottom:6px}
+.notes-area textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--rsm);font-family:var(--sans);font-size:13px;color:var(--slate);resize:vertical;min-height:72px;outline:none;transition:border-color .2s}
+.notes-area textarea:focus{border-color:var(--terra)}
+
+.h-footer{padding:16px 36px;border-top:1px solid var(--border);display:flex;align-items:center;gap:12px;background:var(--white)}
+.btn-back{padding:10px 20px;border:1px solid var(--border);border-radius:var(--rsm);background:var(--white);font-family:var(--sans);font-size:13px;font-weight:500;color:var(--slate-lt);cursor:pointer;transition:all .18s}
+.btn-back:hover{border-color:var(--border-dk);color:var(--slate)}
+.btn-next{padding:10px 28px;border:none;border-radius:var(--rsm);background:var(--terra);color:#fff;font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;transition:all .18s;margin-left:auto}
+.btn-next:hover{background:var(--terra-dk)}
+.footer-score{font-size:13px;color:var(--slate-lt)}
+.footer-score strong{color:var(--terra);font-family:var(--serif);font-size:16px}
+
+/* ── RESULTS SCREEN ── */
+#s-results{flex-direction:column;overflow:hidden;background:var(--stone)}
+.results-header{padding:20px 32px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:20px}
+.results-header h2{font-family:var(--serif);font-size:22px;color:var(--slate)}
+.results-total{font-family:var(--serif);font-size:42px;color:var(--slate);line-height:1}
+.results-denom{font-size:16px;color:var(--slate-lt)}
+.results-band{display:inline-block;font-size:12px;font-weight:600;padding:4px 14px;border-radius:20px;margin-left:12px;vertical-align:middle}
+.results-body{flex:1;overflow-y:auto;padding:24px 32px;display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.results-card{background:var(--white);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--shadow);padding:20px}
+.results-card h3{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--slate-lt);margin-bottom:16px}
+.radar-wrap{height:260px;position:relative}
+
+.score-table{width:100%}
+.score-table-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--stone2)}
+.score-table-row:last-child{border-bottom:none}
+.st-code{font-size:10px;font-weight:700;color:var(--slate-lt);width:26px;flex-shrink:0}
+.st-name{font-size:12px;color:var(--slate);flex:1}
+.st-bar-bg{width:80px;height:4px;background:var(--border);border-radius:2px;overflow:hidden;flex-shrink:0}
+.st-bar-fill{height:100%;border-radius:2px;transition:width .5s}
+.st-score{font-family:var(--serif);font-size:15px;min-width:30px;text-align:right;flex-shrink:0}
+
+.rec-card{display:flex;flex-direction:column;gap:10px}
+.rec-item{padding:12px 14px;border-radius:var(--rsm);border-left:3px solid transparent;font-size:13px;line-height:1.55}
+.rec-item.gap{background:var(--red-lt);border-color:var(--red)}
+.rec-item.config{background:var(--amber-lt);border-color:var(--amber)}
+.rec-item.strength{background:var(--green-lt);border-color:var(--green)}
+.rec-item strong{display:block;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px}
+.rec-item.gap strong{color:var(--red)}
+.rec-item.config strong{color:var(--amber)}
+.rec-item.strength strong{color:var(--green)}
+
+.context-summary{font-size:13px;color:var(--slate-lt);line-height:1.6}
+.context-summary span{display:block;margin-bottom:4px}
+.context-summary strong{color:var(--slate)}
+
+.results-actions{padding:16px 32px;background:var(--white);border-top:1px solid var(--border);display:flex;gap:10px;align-items:center}
+.btn-export{padding:10px 24px;background:var(--slate);color:#fff;border:none;border-radius:var(--rsm);font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:7px;transition:background .18s}
+.btn-export:hover{background:var(--slate-mid)}
+.btn-restart{padding:10px 24px;background:none;border:1px solid var(--border);border-radius:var(--rsm);font-family:var(--sans);font-size:13px;font-weight:500;color:var(--slate-lt);cursor:pointer;transition:all .18s}
+.btn-restart:hover{border-color:var(--border-dk);color:var(--slate)}
+.btn-compare{padding:10px 24px;background:var(--terra-dim);border:1px solid rgba(192,120,74,.3);border-radius:var(--rsm);font-family:var(--sans);font-size:13px;font-weight:600;color:var(--terra-dk);cursor:pointer;transition:all .18s}
+.btn-compare:hover{background:var(--terra);color:#fff}
+
+/* ── Evidence preview panel ── */
+.evidence-panel{margin-top:20px;padding:14px 16px;background:var(--stone);border-radius:var(--rsm);border:1px solid var(--border)}
+.evidence-panel-title{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--slate-lt);margin-bottom:8px}
+.evidence-preview-img{max-width:100%;border-radius:4px;border:1px solid var(--border);margin-bottom:8px;display:block}
+.evidence-note{font-size:12px;color:var(--slate-lt);font-style:italic}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border-dk);border-radius:2px}
+</style>
+</head>
+<body>
+
+<div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
+
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-mark">DQ</div>
+    <div>
+      <div class="logo-name">DQF-M Scorer</div>
+      <div class="logo-sub">Documentation Quality Framework for Manufacturing &middot; Northeastern University 2026</div>
+    </div>
+  </div>
+  <div class="spacer"></div>
+  <div class="tool-chip" id="toolChip"><div class="chip-dot"></div><span id="toolChipName"></span></div>
+  <div class="step-indicator" id="stepInd"></div>
+  <button class="btn-ghost" onclick="restart()">Start over</button>
+</div>
+
+<!-- SCREEN 1: WELCOME + CONTEXT -->
+<div class="screen active" id="s-welcome">
+  <div class="welcome-inner">
+    <div class="welcome-eyebrow">Research Instrument &mdash; Raja Antony Mandal, MS DMC 2026</div>
+    <h1 class="welcome-title">Evaluate any AI documentation tool against six manufacturing heuristics</h1>
+    <p class="welcome-sub">The DQF-M framework scores AI-powered SOP authoring tools across Linguistic Remediation, Knowledge Capture, Operational Continuity, Regulatory Defense, Adoption Friction, and IP Sovereignty. Upload screenshots for evidence-based scoring.</p>
+
+    <div class="heuristic-pills">
+      <div class="h-pill"><span>H1</span>Linguistic</div>
+      <div class="h-pill"><span>H2</span>Knowledge Capture</div>
+      <div class="h-pill"><span>H3</span>Op. Continuity</div>
+      <div class="h-pill"><span>H4</span>Regulatory</div>
+      <div class="h-pill"><span>H5</span>Adoption Friction</div>
+      <div class="h-pill"><span>H6</span>IP Sovereignty</div>
+    </div>
+
+    <div class="context-form">
+      <div class="form-title">Your organization context <span style="font-weight:400;color:var(--slate-lt)">(shapes recommendations)</span></div>
+      <div class="form-row">
+        <div class="field">
+          <label>Industry</label>
+          <select id="ctx-industry">
+            <option value="">Select industry</option>
+            <option>Automotive manufacturing</option>
+            <option>Aerospace & defense</option>
+            <option>Medical device manufacturing</option>
+            <option>Electronics manufacturing</option>
+            <option>Food & beverage manufacturing</option>
+            <option>Chemical manufacturing</option>
+            <option>General manufacturing</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Team size</label>
+          <select id="ctx-team">
+            <option value="">Select size</option>
+            <option>1–50 employees</option>
+            <option>51–250 employees</option>
+            <option>251–1,000 employees</option>
+            <option>1,001–5,000 employees</option>
+            <option>5,000+ employees</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Current doc process</label>
+          <select id="ctx-current">
+            <option value="">Select process</option>
+            <option>Manual Word/Google Docs</option>
+            <option>Basic templates</option>
+            <option>Existing SOP software</option>
+            <option>Paper-based</option>
+            <option>No formal process</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Primary compliance need</label>
+          <select id="ctx-compliance">
+            <option value="">Select standard</option>
+            <option>ISO 9001:2015</option>
+            <option>ISO 13485 (Medical)</option>
+            <option>AS9100 (Aerospace)</option>
+            <option>IATF 16949 (Automotive)</option>
+            <option>FDA 21 CFR Part 11</option>
+            <option>OSHA / Safety docs</option>
+            <option>Multiple standards</option>
+            <option>None specific</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row full">
+        <div class="field">
+          <label>What problem are you trying to solve?</label>
+          <textarea id="ctx-problem" placeholder="e.g. Our SOPs take too long to update and operators are using outdated versions on the shop floor..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="tool-entry">
+      <div class="form-title">Tool being evaluated</div>
+      <div class="field">
+        <label>Tool name</label>
+        <input type="text" id="tool-name" placeholder="e.g. Dozuki, Poka.io, Tulip, Scribe, Trainual..." />
+      </div>
+      <div class="field">
+        <label>Upload screenshots <span style="font-weight:400;color:var(--slate-lt)">(optional — up to 5, enables evidence-based scoring)</span></label>
+        <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()" ondrop="handleDrop(event)" ondragover="e=>e.preventDefault()">
+          <div class="upload-icon">&#128247;</div>
+          <strong>Click to upload or drag &amp; drop</strong>
+          <p>PNG, JPG, GIF &mdash; screenshots of the tool UI, pricing page, DPA, or settings</p>
+        </div>
+        <input type="file" id="fileInput" multiple accept="image/*" style="display:none" onchange="handleFiles(this.files)">
+        <div class="preview-grid" id="previewGrid"></div>
+      </div>
+    </div>
+
+    <button class="cta-btn" id="startBtn" onclick="startEval()" disabled>
+      Start evaluation &rarr;
+    </button>
+  </div>
+</div>
+
+<!-- SCREEN 2: HEURISTIC PANELS -->
+<div class="screen" id="s-heuristic">
+  <div class="h-left">
+    <div class="h-nav">
+      <div class="h-nav-title">Heuristics</div>
+      <div id="hNavItems"></div>
+    </div>
+    <div class="h-screenshot">
+      <div class="h-screenshot-title">Uploaded evidence</div>
+      <div id="screenshotNav"></div>
+    </div>
+  </div>
+  <div class="h-right">
+    <div class="h-content" id="hContent"></div>
+    <div class="h-footer">
+      <button class="btn-back" id="btnBack" onclick="prevH()">&#8592; Back</button>
+      <div class="footer-score">Current score: <strong id="footerScore">—</strong> / 5</div>
+      <button class="btn-next" id="btnNext" onclick="nextH()">Next heuristic &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 3: RESULTS -->
+<div class="screen" id="s-results">
+  <div class="results-header">
+    <div>
+      <h2 id="resultsTitle">Evaluation complete</h2>
+      <div style="margin-top:4px;font-size:13px;color:var(--slate-lt)" id="resultsSubtitle"></div>
+    </div>
+    <div class="spacer"></div>
+    <div style="text-align:right">
+      <div class="results-total"><span id="totalScore">—</span><span class="results-denom"> / 30</span></div>
+      <div class="results-band" id="bandBadge">—</div>
+    </div>
+  </div>
+  <div class="results-body" id="resultsBody"></div>
+  <div class="results-actions">
+    <button class="btn-export" onclick="exportPDF()">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="12" y2="18"/><line x1="15" y1="15" x2="12" y2="18"/></svg>
+      Export PDF report
+    </button>
+    <button class="btn-restart" onclick="restart()">New evaluation</button>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────────
+// HEURISTIC DEFINITIONS
+// ─────────────────────────────────────────────────────────────
+const H = [
+  {
+    code:'H1', name:'Linguistic Remediation by Design', short:'Linguistic',
+    theory:'Poka-Yoke (Shingo, 1986) · Federal Plain Language Guidelines · Flesch-Kincaid',
+    question:'Does the tool enforce plain language outcomes automatically — making complexity structurally impossible rather than merely discouraged?',
+    criteria:[
+      {id:'h1c1', label:'Real-time readability grade display', desc:'Flesch-Kincaid or similar grade level shown to author as they write', weight:2, key:'grade_display'},
+      {id:'h1c2', label:'Passive voice flagging', desc:'Tool identifies and flags passive constructions before finalization', weight:2, key:'passive_flag'},
+      {id:'h1c3', label:'Hard stop before publication', desc:'Document cannot be published if readability threshold is not met', weight:3, key:'hard_stop'},
+      {id:'h1c4', label:'Jargon and acronym detection', desc:'Tool alerts author to undefined jargon or unexplained acronyms', weight:2, key:'jargon'},
+      {id:'h1c5', label:'Author cannot permanently disable enforcement', desc:'Plain language controls cannot be switched off by the document author', weight:1, key:'no_disable'},
+    ],
+    verdicts:{5:'Architecturally enforced — complexity is structurally impossible',4:'Strong real-time enforcement — most issues caught before finalization',3:'Advisory feedback — improvement depends on author discipline',2:'Post-authoring detection — complexity reaches documents before correction',1:'No readability features — tool outputs whatever the author writes'},
+    recommendations:{5:'',4:'',3:'Escalate from advisory to hard-stop: grade compliance should block publication, not just warn.',2:'Implement real-time readability feedback during authoring. Post-completion reports arrive too late for most manufacturing authors.',1:'Introduce minimum Flesch-Kincaid grade 7–8 enforcement as a hard publishing requirement. This is critical for shop floor comprehension.'}
+  },
+  {
+    code:'H2', name:'Knowledge Capture Efficiency', short:'Knowledge Capture',
+    theory:'Tacit Knowledge Externalization (Nonaka & Takeuchi, 1995) · TAM (Davis, 1989) · Cognitive Task Analysis (Crandall et al., 2006)',
+    question:'Can a subject matter expert who is not a writer produce a complete compliant SOP draft — using the tool as the primary capture mechanism?',
+    criteria:[
+      {id:'h2c1', label:'Video input to structured steps', desc:'Expert records a process; tool converts video into step-by-step SOP draft', weight:3, key:'video'},
+      {id:'h2c2', label:'Voice / audio transcription', desc:'Spoken description is captured and structured into document format', weight:2, key:'voice'},
+      {id:'h2c3', label:'Photo annotation to steps', desc:'Images or photos can be annotated and converted to documented procedures', weight:2, key:'photo'},
+      {id:'h2c4', label:'Guided prompts that elicit tacit knowledge', desc:'System asks targeted follow-up questions to surface unstated expert knowledge', weight:2, key:'prompts'},
+      {id:'h2c5', label:'Time to first compliant draft under 30 minutes', desc:'A non-writer SME can produce a reviewable draft within 30 minutes', weight:1, key:'speed'},
+    ],
+    verdicts:{5:'Full tacit externalization — expert demonstrates once, tool generates compliant SOP draft',4:'Strong multimodal capture — writing burden reduced to review, not authoring',3:'Guided prompts reduce burden but written answers still required',2:'Templates available but expert must still write all content',1:'Writing skill required — both subject matter and communication expertise needed simultaneously'},
+    recommendations:{5:'',4:'',3:'Add video or voice capture to eliminate written input entirely for shop floor SMEs. The goal is zero writing required.',2:'Introduce guided prompt sequences that ask targeted questions rather than presenting blank template fields.',1:'Redesign the capture workflow around multimodal input. Requiring writing from machinists creates a fundamental knowledge transfer barrier.'}
+  },
+  {
+    code:'H3', name:'Operational Continuity', short:'Op. Continuity',
+    theory:'Zdravkovic et al. (2022) Enterprise IS · Industry 4.0 Digital Thread · ISO/IEC 25010',
+    question:'Does the tool maintain document integrity across the full operational lifecycle — from authoring through approval through shop floor deployment — with zero manual handoffs?',
+    criteria:[
+      {id:'h3c1', label:'Native QMS integration', desc:'Document changes sync automatically to Quality Management System without manual export', weight:3, key:'qms'},
+      {id:'h3c2', label:'Native LMS integration', desc:'Training records update automatically when document is revised', weight:2, key:'lms'},
+      {id:'h3c3', label:'Shop floor display without manual push', desc:'Approved documents appear on shop floor screens automatically', weight:3, key:'shopfloor'},
+      {id:'h3c4', label:'Version auto-supersession', desc:'Previous versions are automatically archived and removed from active use on approval of new version', weight:2, key:'supersede'},
+      {id:'h3c5', label:'Complete audit trail without manual logging', desc:'All view, edit, and approval events are logged automatically', weight:2, key:'audit'},
+    ],
+    verdicts:{5:'Unbroken digital thread — zero manual handoffs from authoring through audit log',4:'Mostly automated — one optional manual step remains',3:'Partial automation — digital thread broken at one or more points',2:'Export-dependent — all distribution manual after document creation',1:'Manual island — tool operates in isolation from all operational systems'},
+    recommendations:{5:'',4:'',3:'Map the specific broken points in the digital thread and prioritize the highest-risk manual handoff for automation first — typically the QMS or shop floor display connection.',2:'Start by building one native integration. The QMS connection eliminates the highest version-risk handoff in most manufacturing environments.',1:'Without operational integrations this tool is a document editor, not a documentation system. API connectivity to QMS and LMS platforms is a prerequisite for enterprise adoption.'}
+  },
+  {
+    code:'H4', name:'Regulatory Defense by Default', short:'Regulatory',
+    theory:"Reason's Swiss Cheese Model (1990) · Fail-Safe Design (Petroski, 1992) · ISO 9001:2015 Clause 7.5",
+    question:"Is non-compliance structurally impossible — can a user publish a document that would fail an ISO 9001 Clause 7.5 audit, or does the system's architecture prevent this?",
+    criteria:[
+      {id:'h4c1', label:'Version number system-generated and mandatory', desc:'Every document receives an auto-incremented version number that cannot be removed or faked', weight:3, key:'version'},
+      {id:'h4c2', label:'Approval workflow mandatory before publication', desc:'Document cannot be published without completing the defined approval chain', weight:3, key:'approval'},
+      {id:'h4c3', label:'Revision date auto-stamped', desc:'System automatically records the date of each revision — author cannot manually enter or alter this', weight:2, key:'revdate'},
+      {id:'h4c4', label:'Superseded versions automatically archived', desc:'Previous versions are locked and removed from active circulation on publication of new version', weight:2, key:'archive'},
+      {id:'h4c5', label:'Non-compliant publication is blocked, not warned', desc:'A document missing required fields cannot be submitted — the system physically prevents publication', weight:3, key:'block'},
+    ],
+    verdicts:{5:'Non-compliance structurally impossible — every ISO 9001 Clause 7.5 requirement enforced at system level',4:'Critical fields mandatory — minor elements may still be optional',3:'Warnings present but dismissible — compliance depends on user discipline',2:'Soft prompts only — motivated user can bypass all compliance controls',1:'No compliance architecture — user publishes any document in any state'},
+    recommendations:{5:'',4:'Audit the remaining optional elements against your specific compliance standard and consider whether any should be escalated to hard requirements.',3:'Convert dismissible warnings to hard stops for the three critical fields: version number, approval signature, and revision date. These are the core Clause 7.5 requirements.',2:'Rebuild the publication workflow with mandatory fields. Advisory-only compliance is no compliance in a manufacturing audit context.',1:'This tool cannot be used in an ISO 9001 or regulated manufacturing environment without a complete workflow redesign.'}
+  },
+  {
+    code:'H5', name:'Adoption Friction by Design', short:'Adoption Friction',
+    theory:'TAM (Davis, 1989) · Diffusion of Innovations (Rogers, 2003) · Organizational Change Management (Kotter, 1996)',
+    question:'Can any manufacturing employee — machinist, process engineer, QA technician — adopt this tool on day one without vendor onboarding, a technical writer intermediary, or hidden implementation costs?',
+    criteria:[
+      {id:'h5c1', label:'Pricing published before contract', desc:'Full cost including implementation, training, and year-3 maintenance is visible before signing', weight:2, key:'pricing'},
+      {id:'h5c2', label:'Self-service onboarding under 2 hours', desc:'A non-technical employee can produce a first document without a vendor call or a technical writer', weight:3, key:'onboard'},
+      {id:'h5c3', label:'Manufacturing-specific templates included', desc:'SOP, LOTO, work instruction, and safety procedure templates are available out of the box', weight:2, key:'templates'},
+      {id:'h5c4', label:'No vendor professional services required', desc:'Template customization, integration setup, and training are self-service — not billable add-ons', weight:2, key:'novendor'},
+      {id:'h5c5', label:'UI language requires no writing background', desc:'Navigation, labels, and prompts are designed for shop floor roles, not documentation professionals', weight:3, key:'ui_lang'},
+    ],
+    verdicts:{5:'Frictionless by design — any manufacturing employee produces a compliant document on day one',4:'Low friction — transparent pricing, short onboarding, self-service deployment',3:'Guided adoption — self-deployment possible with significant time investment',2:'Moderate friction — non-technical authors need an intermediary and some costs are hidden',1:'High friction — vendor-dependent implementation, opaque pricing, UI requires documentation expertise'},
+    recommendations:{5:'',4:'',3:'Reduce role-specific onboarding to under 2 hours and publish the complete cost of ownership — including implementation and year-3 maintenance — before contract signature.',2:'Create onboarding paths for non-technical roles (machinist, QA tech) specifically. Generic onboarding assumes writing expertise that shop floor employees do not have.',1:'This tool was designed for documentation professionals, not manufacturing employees. Without significant UX redesign it will stall at procurement regardless of technical capability.'}
+  },
+  {
+    code:'H6', name:'Intellectual Property Sovereignty', short:'IP Sovereignty',
+    theory:'NIST Cybersecurity Framework (2014) · ISO 27001 · Proprietary Knowledge as Strategic Asset (Grant, 1996)',
+    question:'Does the organization retain complete, legally enforceable, and verifiably audited control over its process knowledge — with no vendor data rights, no AI training exposure, and no unilateral access?',
+    criteria:[
+      {id:'h6c1', label:'Tamper-proof version date stamps', desc:'System-generated creation, modification, and approval timestamps that neither vendor nor customer can alter retroactively', weight:2, key:'timestamps'},
+      {id:'h6c2', label:'Complete user access audit log', desc:'Every view, edit, approval, and export action is recorded with user identity and timestamp — available to customer at any time', weight:3, key:'accesslog'},
+      {id:'h6c3', label:'Explicit AI training prohibition in DPA', desc:"Data Processing Agreement explicitly states the vendor cannot use customer content to train AI models — no exceptions or carve-outs", weight:3, key:'ai_prohibit'},
+      {id:'h6c4', label:'Independent compliance certification', desc:'Vendor holds SOC 2 Type II or ISO 27001 certification — not self-assessed, independently audited', weight:2, key:'cert'},
+      {id:'h6c5', label:'Data deletion on termination guaranteed in writing', desc:'Contract specifies complete data deletion within a defined period on termination, with written confirmation to customer', weight:2, key:'deletion'},
+    ],
+    verdicts:{5:'Full sovereignty — tamper-proof audit trail, AI training prohibition, independent certification, guaranteed deletion',4:'Contractual ownership confirmed — strong protection with certified compliance',3:'Ownership claimed in policy — unverified by independent audit, some logging gaps',2:'Ambiguous ownership — vendor data rights present through exceptions or silence',1:'No IP protection — vendor data rights active, no audit trail, no compliance certification'},
+    recommendations:{5:'',4:'',3:'Request SOC 2 Type II or ISO 27001 certification documentation. Policy statements are not auditable — only independent certification is.',2:'Do not sign a contract with ambiguous data ownership language. Require an explicit DPA with AI training prohibition before signature. This protects your process IP against the primary vendor risk in the AI era.',1:'This vendor poses an active IP risk. A proprietary assembly sequence or safety procedure submitted to this tool may become vendor training data. Do not use for any process you consider competitively sensitive.'}
+  }
+];
+
+const BANDS = [
+  {min:24, label:'Enterprise-ready',    bg:'#E8F5EE', color:'#1A7A4A'},
+  {min:17, label:'Needs revision',       bg:'#FEF3C7', color:'#B45309'},
+  {min:10, label:'Significant gaps',     bg:'#FDECEB', color:'#C0392B'},
+  {min:0,  label:'Major redesign required', bg:'#FDECEB', color:'#922B21'}
+];
+
+const SCORE_COLORS = {5:'#1A7A4A',4:'#2E9E68',3:'#B45309',2:'#C0392B',1:'#8B0000'};
+
+// ─────────────────────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────────────────────
+let state = {
+  tool: '', context: {},
+  screenshots: [],   // {name, dataUrl}
+  currentH: 0,
+  criteria: {},      // {H1:{h1c1:'confirmed'|'partial'|'absent'|null,...},...}
+  notes: {},         // {H1:'...'}
+  scores: {},        // {H1: 0-5}
+};
+let radarChart = null;
+
+// Init criteria state
+H.forEach(h => {
+  state.criteria[h.code] = {};
+  h.criteria.forEach(c => state.criteria[h.code][c.id] = null);
+  state.notes[h.code] = '';
+});
+
+// ─────────────────────────────────────────────────────────────
+// SCORING ENGINE
+// ─────────────────────────────────────────────────────────────
+function computeHScore(hCode) {
+  const h = H.find(x => x.code === hCode);
+  const crit = state.criteria[hCode];
+  let totalWeight = 0, earnedWeight = 0;
+  h.criteria.forEach(c => {
+    totalWeight += c.weight;
+    const v = crit[c.id];
+    if (v === 'confirmed') earnedWeight += c.weight;
+    else if (v === 'partial') earnedWeight += c.weight * 0.5;
+    // absent or null = 0
+  });
+  const answered = Object.values(crit).filter(v => v !== null).length;
+  if (answered === 0) return null;
+  const ratio = earnedWeight / totalWeight;
+  if (ratio >= 0.90) return 5;
+  if (ratio >= 0.70) return 4;
+  if (ratio >= 0.45) return 3;
+  if (ratio >= 0.20) return 2;
+  return 1;
+}
+
+function allCriteriaAnswered(hCode) {
+  const h = H.find(x => x.code === hCode);
+  const crit = state.criteria[hCode];
+  return h.criteria.every(c => crit[c.id] !== null);
+}
+
+function getScoreColor(s) { return SCORE_COLORS[s] || '#CBD1D8'; }
+function getBand(t) { return BANDS.find(b => t >= b.min) || BANDS[BANDS.length - 1]; }
+
+// ─────────────────────────────────────────────────────────────
+// SCREENSHOT HANDLING
+// ─────────────────────────────────────────────────────────────
+function handleFiles(files) {
+  Array.from(files).slice(0, 5 - state.screenshots.length).forEach(f => {
+    if (!f.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      state.screenshots.push({name: f.name, dataUrl: e.target.result});
+      renderPreviews();
+    };
+    reader.readAsDataURL(f);
+  });
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  handleFiles(e.dataTransfer.files);
+}
+
+document.getElementById('uploadArea').addEventListener('dragover', e => e.preventDefault());
+
+function renderPreviews() {
+  const grid = document.getElementById('previewGrid');
+  grid.innerHTML = state.screenshots.map((s, i) => `
+    <div class="preview-thumb">
+      <img src="${s.dataUrl}" alt="${s.name}">
+      <button onclick="removeScreenshot(${i})">&#215;</button>
+    </div>`).join('');
+}
+
+function removeScreenshot(i) {
+  state.screenshots.splice(i, 1);
+  renderPreviews();
+}
+
+// ─────────────────────────────────────────────────────────────
+// WELCOME SCREEN
+// ─────────────────────────────────────────────────────────────
+document.getElementById('tool-name').addEventListener('input', function() {
+  document.getElementById('startBtn').disabled = !this.value.trim();
+});
+
+function startEval() {
+  state.tool = document.getElementById('tool-name').value.trim();
+  state.context = {
+    industry:   document.getElementById('ctx-industry').value,
+    team:       document.getElementById('ctx-team').value,
+    current:    document.getElementById('ctx-current').value,
+    compliance: document.getElementById('ctx-compliance').value,
+    problem:    document.getElementById('ctx-problem').value.trim()
+  };
+  document.getElementById('toolChipName').textContent = state.tool;
+  document.getElementById('toolChip').classList.add('show');
+  showScreen('s-heuristic');
+  renderHeuristicNav();
+  renderScreenshotNav();
+  loadHeuristic(0);
+  updateProgress();
+}
+
+// ─────────────────────────────────────────────────────────────
+// SCREEN MANAGEMENT
+// ─────────────────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function updateProgress() {
+  const total = H.length;
+  const done = H.filter(h => allCriteriaAnswered(h.code)).length;
+  const pct = state.currentH === H.length ? 100 : ((state.currentH / total) * 85 + (done / total) * 15);
+  document.getElementById('progFill').style.width = Math.min(100, pct * 1.1) + '%';
+  document.getElementById('stepInd').textContent = `${state.currentH + 1} of ${H.length}`;
+}
+
+// ─────────────────────────────────────────────────────────────
+// HEURISTIC SCREEN
+// ─────────────────────────────────────────────────────────────
+function renderHeuristicNav() {
+  document.getElementById('hNavItems').innerHTML = H.map((h, i) => {
+    const s = state.scores[h.code];
+    const col = s ? getScoreColor(s) : '#CBD1D8';
+    const pct = s ? (s / 5 * 100) : 0;
+    const done = allCriteriaAnswered(h.code);
+    return `<div class="h-nav-item ${i === state.currentH ? 'active' : ''} ${done ? 'done' : ''}" onclick="loadHeuristic(${i})">
+      <div class="h-nav-code">${h.code}</div>
+      <div class="h-nav-info">
+        <div class="h-nav-name">${h.short}</div>
+        <div class="h-nav-score">${s ? s + '/5' : 'Not scored'}</div>
+        <div class="h-nav-bar"><div class="h-nav-bar-fill" style="width:${pct}%;background:${col}"></div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderScreenshotNav() {
+  const el = document.getElementById('screenshotNav');
+  if (!state.screenshots.length) {
+    el.innerHTML = '<div class="no-screenshots">No screenshots uploaded</div>';
+    return;
+  }
+  el.innerHTML = `<div class="screenshot-thumbs">${state.screenshots.map((s,i)=>`
+    <div class="ss-thumb" onclick="selectScreenshot(${i})" id="ssthumb${i}">
+      <img src="${s.dataUrl}" alt="${s.name}">
+    </div>`).join('')}</div>`;
+}
+
+let selectedScreenshot = null;
+function selectScreenshot(i) {
+  selectedScreenshot = i;
+  document.querySelectorAll('.ss-thumb').forEach((t,j) => t.classList.toggle('selected', j===i));
+  // Re-render content to show screenshot in evidence panel
+  loadHeuristic(state.currentH, true);
+}
+
+function loadHeuristic(idx, keepScroll) {
+  state.currentH = idx;
+  const h = H[idx];
+  const crit = state.criteria[h.code];
+  const score = computeHScore(h.code);
+  state.scores[h.code] = score;
+
+  const col = score ? getScoreColor(score) : '#CBD1D8';
+  const barW = score ? (score / 5 * 100) + '%' : '0%';
+  const verdict = score ? h.verdicts[score] : 'Answer the criteria below to generate a score';
+
+  let evidencePanel = '';
+  if (selectedScreenshot !== null && state.screenshots[selectedScreenshot]) {
+    const ss = state.screenshots[selectedScreenshot];
+    evidencePanel = `<div class="evidence-panel">
+      <div class="evidence-panel-title">Evidence: ${ss.name}</div>
+      <img src="${ss.dataUrl}" class="evidence-preview-img" alt="${ss.name}">
+      <div class="evidence-note">Use this screenshot to inform your responses below. Toggle criteria based on what is visible.</div>
+    </div>`;
+  }
+
+  document.getElementById('hContent').innerHTML = `
+    <div class="h-eyebrow">${h.code} of ${H.length}</div>
+    <div class="h-title">${h.name}</div>
+    <div class="h-theory">${h.theory}</div>
+    <div class="h-question">${h.question}</div>
+    ${evidencePanel}
+    <div class="h-score-display">
+      <div class="h-score-num" style="color:${col}">${score || '—'}</div>
+      <div class="h-score-meta">
+        <div class="h-score-label">Current score</div>
+        <div class="h-score-bar-bg"><div class="h-score-bar-fill" style="width:${barW};background:${col}"></div></div>
+        <div class="h-score-verdict" style="color:${col}">${verdict}</div>
+      </div>
+    </div>
+    <div class="criteria-section">
+      <div class="criteria-title">Evaluation criteria — toggle each based on your evidence</div>
+      ${h.criteria.map(c => {
+        const val = crit[c.id];
+        return `<div class="criterion">
+          <div class="criterion-text">
+            <div class="criterion-label">${c.label}</div>
+            <div class="criterion-desc">${c.desc}</div>
+            <div class="criterion-weight">Weight: ${'●'.repeat(c.weight)}${'○'.repeat(3-Math.min(c.weight,3))} &nbsp;${c.weight >= 3 ? 'High impact' : c.weight === 2 ? 'Medium impact' : 'Low impact'}</div>
+          </div>
+          <div class="toggle-group">
+            <button class="toggle-btn ${val==='confirmed'?'confirmed':''}" onclick="setCriterion('${h.code}','${c.id}','confirmed',this)">&#10003; Confirmed</button>
+            <button class="toggle-btn ${val==='partial'?'partial':''}" onclick="setCriterion('${h.code}','${c.id}','partial',this)">&#126; Partial</button>
+            <button class="toggle-btn ${val==='absent'?'absent':''}" onclick="setCriterion('${h.code}','${c.id}','absent',this)">&#10007; Absent</button>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="notes-area">
+      <label>Additional notes for ${h.code} <span style="font-weight:400;color:var(--slate-lt)">(optional)</span></label>
+      <textarea placeholder="Add context, caveats, or specific evidence observed..." onchange="state.notes['${h.code}']=this.value">${state.notes[h.code]||''}</textarea>
+    </div>`;
+
+  if (!keepScroll) document.getElementById('hContent').scrollTop = 0;
+
+  // Footer
+  document.getElementById('footerScore').textContent = score || '—';
+  document.getElementById('footerScore').style.color = col;
+  document.getElementById('btnBack').style.display = idx === 0 ? 'none' : '';
+  document.getElementById('btnNext').textContent = idx === H.length - 1 ? 'View results →' : 'Next heuristic →';
+
+  renderHeuristicNav();
+  updateProgress();
+}
+
+function setCriterion(hCode, cId, val, btn) {
+  // Toggle off if already selected
+  const current = state.criteria[hCode][cId];
+  state.criteria[hCode][cId] = current === val ? null : val;
+  loadHeuristic(state.currentH, true);
+}
+
+function prevH() {
+  if (state.currentH > 0) loadHeuristic(state.currentH - 1);
+}
+
+function nextH() {
+  if (state.currentH < H.length - 1) {
+    loadHeuristic(state.currentH + 1);
+  } else {
+    showResults();
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// RESULTS
+// ─────────────────────────────────────────────────────────────
+function showResults() {
+  // Finalize all scores
+  H.forEach(h => { state.scores[h.code] = computeHScore(h.code) || 1; });
+  const total = Object.values(state.scores).reduce((a,b)=>a+b,0);
+  const band = getBand(total);
+
+  document.getElementById('totalScore').textContent = total;
+  document.getElementById('resultsTitle').textContent = `${state.tool} — Evaluation complete`;
+  document.getElementById('resultsSubtitle').textContent = state.context.industry ? `${state.context.industry} · ${state.context.team || 'Team size not specified'}` : 'DQF-M Framework Evaluation';
+  const bb = document.getElementById('bandBadge');
+  bb.textContent = band.label; bb.style.background = band.bg; bb.style.color = band.color;
+
+  // Build results body
+  const low    = H.filter(h => state.scores[h.code] <= 2);
+  const mid    = H.filter(h => state.scores[h.code] === 3);
+  const high   = H.filter(h => state.scores[h.code] >= 4);
+
+  let recs = '';
+  if (low.length) recs += low.map(h=>`<div class="rec-item gap"><strong>Priority gap — ${h.code} ${h.short}</strong>${h.recommendations[state.scores[h.code]]||''}</div>`).join('');
+  if (mid.length) recs += mid.map(h=>`<div class="rec-item config"><strong>Needs configuration — ${h.code} ${h.short}</strong>${h.recommendations[state.scores[h.code]]||''}</div>`).join('');
+  if (high.length) recs += high.map(h=>`<div class="rec-item strength"><strong>Strength — ${h.code} ${h.short}</strong>${h.verdicts[state.scores[h.code]]}</div>`).join('');
+
+  let contextSummary = `<div class="context-summary">`;
+  if (state.context.industry) contextSummary += `<span><strong>Industry:</strong> ${state.context.industry}</span>`;
+  if (state.context.team)     contextSummary += `<span><strong>Team size:</strong> ${state.context.team}</span>`;
+  if (state.context.compliance) contextSummary += `<span><strong>Compliance:</strong> ${state.context.compliance}</span>`;
+  if (state.context.current)  contextSummary += `<span><strong>Current process:</strong> ${state.context.current}</span>`;
+  if (state.context.problem)  contextSummary += `<span style="margin-top:8px;font-style:italic">"${state.context.problem}"</span>`;
+  contextSummary += '</div>';
+
+  document.getElementById('resultsBody').innerHTML = `
+    <div class="results-card">
+      <h3>Score radar &mdash; ${state.tool}</h3>
+      <div class="radar-wrap"><canvas id="radarChart"></canvas></div>
+    </div>
+    <div class="results-card">
+      <h3>Heuristic breakdown</h3>
+      <div class="score-table">
+        ${H.map(h=>{
+          const s=state.scores[h.code],col=getScoreColor(s);
+          return`<div class="score-table-row">
+            <div class="st-code">${h.code}</div>
+            <div class="st-name">${h.name}</div>
+            <div class="st-bar-bg"><div class="st-bar-fill" style="width:${s/5*100}%;background:${col}"></div></div>
+            <div class="st-score" style="color:${col}">${s} / 5</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+    <div class="results-card">
+      <h3>Recommendations</h3>
+      <div class="rec-card">${recs || '<div class="rec-item strength"><strong>Excellent</strong>This tool meets enterprise documentation quality standards across all six heuristics.</div>'}</div>
+    </div>
+    <div class="results-card">
+      <h3>Evaluation context</h3>
+      ${contextSummary}
+    </div>`;
+
+  showScreen('s-results');
+  document.getElementById('progFill').style.width = '100%';
+  document.getElementById('stepInd').textContent = 'Complete';
+
+  // Radar chart
+  setTimeout(() => {
+    const data = H.map(h => state.scores[h.code] || 0);
+    if (radarChart) radarChart.destroy();
+    radarChart = new Chart(document.getElementById('radarChart').getContext('2d'), {
+      type: 'radar',
+      data: {
+        labels: H.map(h => h.code),
+        datasets: [{
+          data,
+          backgroundColor: 'rgba(192,120,74,0.1)',
+          borderColor: '#C0784A',
+          borderWidth: 2.5,
+          pointBackgroundColor: data.map(v => getScoreColor(v)),
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 6
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        scales: { r: {
+          min: 0, max: 5,
+          ticks: { stepSize: 1, color: '#9E9890', backdropColor: 'transparent', font: { size: 10 } },
+          grid: { color: 'rgba(0,0,0,0.06)' },
+          angleLines: { color: 'rgba(0,0,0,0.06)' },
+          pointLabels: { color: '#1C2B3A', font: { size: 12, weight: '600', family: '"Inter",sans-serif' } }
+        }},
+        plugins: { legend: { display: false } }
+      }
+    });
+  }, 100);
+}
+
+// ─────────────────────────────────────────────────────────────
+// PDF EXPORT
+// ─────────────────────────────────────────────────────────────
+function exportPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+  const W = 210, M = 20, cw = W - M*2;
+  let y = 20;
+
+  // Header
+  doc.setFillColor(28,43,58); doc.rect(0,0,W,32,'F');
+  doc.setTextColor(255,255,255); doc.setFontSize(18); doc.setFont('helvetica','bold');
+  doc.text('DQF-M EVALUATION REPORT', M, 14);
+  doc.setFontSize(9); doc.setFont('helvetica','normal');
+  doc.text('Documentation Quality Framework for Manufacturing', M, 21);
+  doc.text(`${state.tool}  ·  ${new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}`, M, 27);
+  y = 44;
+
+  // Total score band
+  const total = Object.values(state.scores).reduce((a,b)=>a+b,0);
+  const band = getBand(total);
+  doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(28,43,58);
+  doc.text('TOTAL SCORE', M, y); y+=6;
+  doc.setFontSize(28); doc.setTextColor(192,120,74);
+  doc.text(`${total} / 30`, M, y); y+=6;
+  doc.setFontSize(11); doc.setTextColor(28,43,58);
+  doc.text(band.label.toUpperCase(), M, y); y+=12;
+
+  // Context
+  if (state.context.industry || state.context.team) {
+    doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(99,114,133);
+    const ctx = [state.context.industry, state.context.team, state.context.compliance].filter(Boolean).join('  ·  ');
+    doc.text(ctx, M, y); y+=10;
+  }
+
+  // Score table
+  doc.setDrawColor(226,230,234);
+  doc.setFillColor(244,246,248); doc.rect(M, y, cw, 7, 'F');
+  doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(99,114,133);
+  doc.text('CODE', M+2, y+5); doc.text('HEURISTIC', M+20, y+5);
+  doc.text('SCORE', M+cw-20, y+5); doc.text('VERDICT', M+cw-60, y+5);
+  y+=9;
+
+  H.forEach((h, i) => {
+    const s = state.scores[h.code];
+    if (i%2===0) { doc.setFillColor(249,250,251); doc.rect(M,y,cw,8,'F'); }
+    doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(192,120,74);
+    doc.text(h.code, M+2, y+5.5);
+    doc.setFont('helvetica','normal'); doc.setTextColor(28,43,58);
+    doc.text(h.name, M+20, y+5.5);
+    doc.setFont('helvetica','bold');
+    const col = s>=4?[26,122,74]:s===3?[180,83,9]:[192,57,43];
+    doc.setTextColor(...col);
+    doc.text(`${s} / 5`, M+cw-18, y+5.5);
+    doc.setFont('helvetica','normal'); doc.setTextColor(28,43,58);
+    const verdictShort = (h.verdicts[s]||'').split('—')[0].trim().substring(0,35);
+    doc.text(verdictShort, M+cw-58, y+5.5);
+    y+=8;
+  });
+  y+=8;
+
+  // Recommendations
+  if (y > 240) { doc.addPage(); y = 20; }
+  doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(28,43,58);
+  doc.text('RECOMMENDATIONS', M, y); y+=8;
+
+  H.forEach(h => {
+    const s = state.scores[h.code];
+    const rec = h.recommendations[s];
+    if (!rec) return;
+    if (y > 250) { doc.addPage(); y=20; }
+    const col = s<=2?[192,57,43]:s===3?[180,83,9]:[26,122,74];
+    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(...col);
+    doc.text(`${h.code} ${h.short}  (${s}/5)`, M, y); y+=5;
+    doc.setFont('helvetica','normal'); doc.setTextColor(28,43,58);
+    const lines = doc.splitTextToSize(rec, cw);
+    lines.forEach(line => { if(y>270){doc.addPage();y=20;} doc.text(line,M,y); y+=4.5; });
+    y+=4;
+  });
+
+  // Notes
+  const hasNotes = Object.entries(state.notes).some(([,v])=>v.trim());
+  if (hasNotes) {
+    if (y>240){doc.addPage();y=20;}
+    doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(28,43,58);
+    doc.text('EVALUATOR NOTES', M, y); y+=8;
+    Object.entries(state.notes).forEach(([code,note])=>{
+      if(!note.trim())return;
+      if(y>260){doc.addPage();y=20;}
+      doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(99,114,133);
+      doc.text(code, M, y); y+=5;
+      doc.setFont('helvetica','normal');doc.setTextColor(28,43,58);
+      const lines=doc.splitTextToSize(note,cw);
+      lines.forEach(l=>{if(y>270){doc.addPage();y=20;}doc.text(l,M,y);y+=4.5;});
+      y+=4;
+    });
+  }
+
+  // Footer
+  const pages = doc.getNumberOfPages();
+  for(let i=1;i<=pages;i++){
+    doc.setPage(i);
+    doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(155,155,155);
+    doc.text('Raja Antony Mandal · MS Digital Media & Communication · Northeastern University 2026 · DQF-M Framework', M, 290);
+    doc.text(`Page ${i} of ${pages}`, W-M, 290, {align:'right'});
+  }
+
+  doc.save(`DQF-M_${state.tool.replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.pdf`);
+}
+
+// ─────────────────────────────────────────────────────────────
+// RESTART
+// ─────────────────────────────────────────────────────────────
+function restart() {
+  state = {tool:'',context:{},screenshots:[],currentH:0,criteria:{},notes:{},scores:{}};
+  H.forEach(h => {
+    state.criteria[h.code]={};
+    h.criteria.forEach(c=>state.criteria[h.code][c.id]=null);
+    state.notes[h.code]='';
+  });
+  selectedScreenshot=null;
+  if(radarChart){radarChart.destroy();radarChart=null;}
+  document.getElementById('tool-name').value='';
+  document.getElementById('startBtn').disabled=true;
+  document.getElementById('toolChip').classList.remove('show');
+  document.getElementById('previewGrid').innerHTML='';
+  document.getElementById('progFill').style.width='0%';
+  document.getElementById('stepInd').textContent='';
+  ['ctx-industry','ctx-team','ctx-current','ctx-compliance'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('ctx-problem').value='';
+  showScreen('s-welcome');
+}
+</script>
+</body>
+</html>
