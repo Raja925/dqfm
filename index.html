@@ -16,212 +16,297 @@
   --stone:#F4F6F8;--stone2:#EDF0F3;--border:#E2E6EA;--border-dk:#CBD1D8;
   --green:#1A7A4A;--green-lt:#E8F5EE;--amber:#B45309;--amber-lt:#FEF3C7;
   --red:#C0392B;--red-lt:#FDECEB;--muted:#9CA3AF;
-  --serif:"DM Serif Display",Georgia,serif;--sans:"Inter",system-ui,sans-serif;
-  --r:10px;--rsm:6px;--shadow:0 1px 3px rgba(28,43,58,.08),0 1px 8px rgba(28,43,58,.04);
+  --serif:"DM Serif Display",Georgia,serif;
+  --sans:"Inter",system-ui,sans-serif;
+  --r:10px;--rsm:6px;
+  --shadow:0 1px 3px rgba(28,43,58,.08),0 1px 8px rgba(28,43,58,.04);
   --shadow-md:0 4px 16px rgba(28,43,58,.12);
 }
-html,body{height:100%;font-family:var(--sans);background:var(--white);color:var(--slate);overflow:hidden;display:flex;flex-direction:column}
-.prog-bar{height:3px;background:var(--stone2);flex-shrink:0}
-.prog-fill{height:100%;background:var(--terra);transition:width .5s ease;width:0%}
-.topbar{display:flex;align-items:center;gap:14px;padding:0 28px;height:54px;flex-shrink:0;border-bottom:1px solid var(--border);background:var(--white)}
+html{height:100%;font-family:var(--sans);background:var(--white);color:var(--slate)}
+body{min-height:100%;display:flex;flex-direction:column}
+
+/* ── TOPBAR ── */
+.topbar{display:flex;align-items:center;gap:14px;padding:0 24px;height:54px;flex-shrink:0;border-bottom:1px solid var(--border);background:var(--white);position:sticky;top:0;z-index:50}
 .logo{display:flex;align-items:center;gap:10px}
 .logo-mark{width:30px;height:30px;border-radius:var(--rsm);background:var(--terra);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:13px;color:#fff;flex-shrink:0}
 .logo-name{font-family:var(--serif);font-size:15px;color:var(--slate)}
 .logo-sub{font-size:10px;color:var(--muted);margin-top:1px}
+@media(max-width:600px){.logo-sub{display:none}}
 .spacer{flex:1}
-.tool-chip{display:none;align-items:center;gap:6px;background:var(--terra-dim);border:1px solid rgba(192,120,74,.3);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--terra-dk);font-weight:500}
+.tool-chip{display:none;align-items:center;gap:6px;background:var(--terra-dim);border:1px solid rgba(192,120,74,.3);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--terra-dk);font-weight:500;white-space:nowrap}
 .tool-chip.show{display:flex}
-.chip-dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
-.btn-ghost{font-size:12px;color:var(--muted);background:none;border:1px solid var(--border);border-radius:var(--rsm);padding:5px 14px;cursor:pointer;font-family:var(--sans);font-weight:500;transition:all .18s}
+.chip-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
+.btn-ghost{font-size:12px;color:var(--muted);background:none;border:1px solid var(--border);border-radius:var(--rsm);padding:5px 14px;cursor:pointer;font-family:var(--sans);font-weight:500;transition:all .18s;white-space:nowrap}
 .btn-ghost:hover{color:var(--slate);border-color:var(--border-dk)}
-.screen{display:none;flex:1;overflow:hidden}
-.screen.active{display:flex}
 
-/* ── SCREEN 1: SMART ENTRY ── */
-#s-entry{flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;overflow-y:auto;background:var(--white)}
-.entry-inner{max-width:640px;width:100%}
-.entry-eyebrow{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--terra);margin-bottom:12px}
-.entry-title{font-family:var(--serif);font-size:34px;color:var(--slate);margin-bottom:10px;line-height:1.15}
-.entry-sub{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:32px}
-.entry-card{background:var(--stone);border:1px solid var(--border);border-radius:var(--r);padding:24px;margin-bottom:16px}
-.entry-card-title{font-size:12px;font-weight:600;color:var(--slate);margin-bottom:14px}
+/* ── PROGRESS BAR ── */
+.prog-bar{height:3px;background:var(--stone2);flex-shrink:0}
+.prog-fill{height:100%;background:var(--terra);transition:width .5s ease;width:0%}
+
+/* ── SCREENS ── */
+.screen{display:none}
+.screen.active{display:block}
+
+/* ── SCREEN 1: ENTRY ── */
+#s-entry{background:var(--white)}
+.entry-layout{
+  display:grid;
+  grid-template-columns:400px 1fr;
+  min-height:calc(100vh - 57px);
+}
+@media(max-width:900px){
+  .entry-layout{grid-template-columns:1fr}
+}
+.entry-left{
+  background:var(--slate);
+  padding:48px 40px;
+  display:flex;flex-direction:column;justify-content:center;
+  position:sticky;top:54px;height:calc(100vh - 54px);
+  overflow:hidden;
+}
+@media(max-width:900px){
+  .entry-left{position:static;height:auto;padding:32px 24px;min-height:0}
+}
+.entry-eyebrow{font-size:10px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--terra);margin-bottom:16px}
+.entry-title{font-family:var(--serif);font-size:32px;color:#fff;line-height:1.15;margin-bottom:14px}
+@media(max-width:900px){.entry-title{font-size:24px}}
+.entry-sub{font-size:13px;color:rgba(255,255,255,.55);line-height:1.7;margin-bottom:32px}
+@media(max-width:900px){.entry-sub{margin-bottom:20px}}
+.h-pill-grid{display:flex;flex-direction:column;gap:10px}
+.h-pill-row{display:flex;align-items:flex-start;gap:10px}
+.h-pill-code{width:28px;height:28px;border-radius:5px;background:rgba(192,120,74,.25);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--terra);flex-shrink:0}
+.h-pill-text{flex:1}
+.h-pill-name{font-size:11px;font-weight:600;color:#fff}
+.h-pill-theory{font-size:10px;color:rgba(255,255,255,.4);margin-top:1px}
+.entry-right{padding:40px 48px;overflow-y:auto}
+@media(max-width:900px){.entry-right{padding:24px 20px}}
+@media(max-width:600px){.entry-right{padding:20px 16px}}
+.section-title{font-size:13px;font-weight:600;color:var(--slate);margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.form-section{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
 .field{margin-bottom:14px}
 .field:last-child{margin-bottom:0}
-.field label{display:block;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
-.field input,.field select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--rsm);font-family:var(--sans);font-size:13px;color:var(--slate);background:var(--white);outline:none;transition:border-color .2s}
-.field input:focus,.field select:focus{border-color:var(--terra)}
-.known-tools{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
-.known-chip{font-size:11px;padding:4px 10px;border-radius:14px;border:1px solid var(--border);background:var(--white);color:var(--muted);cursor:pointer;transition:all .16s;font-weight:500}
-.known-chip:hover,.known-chip.selected{background:var(--terra);color:#fff;border-color:var(--terra)}
-.known-chip .chip-score{font-size:10px;margin-left:4px;opacity:.75}
-.upload-zone{border:2px dashed var(--border-dk);border-radius:var(--rsm);padding:22px;text-align:center;cursor:pointer;transition:all .2s;background:var(--white);position:relative}
+.field label{display:block;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.field input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--rsm);font-family:var(--sans);font-size:13px;color:var(--slate);background:var(--white);outline:none;transition:border-color .2s}
+.field input:focus{border-color:var(--terra)}
+.known-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}
+.known-chip{display:flex;align-items:center;gap:6px;font-size:12px;padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:var(--white);color:var(--slate-lt);cursor:pointer;transition:all .16s;font-weight:500}
+.known-chip:hover{border-color:var(--terra);color:var(--terra)}
+.known-chip.selected{background:var(--terra);color:#fff;border-color:var(--terra)}
+.known-chip .ks{font-size:10px;opacity:.7;margin-left:2px}
+.upload-zone{border:2px dashed var(--border-dk);border-radius:var(--rsm);padding:20px;text-align:center;cursor:pointer;transition:all .2s;background:var(--white);position:relative}
 .upload-zone:hover,.upload-zone.drag{border-color:var(--terra);background:var(--terra-dim)}
-.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer}
-.upload-zone-icon{font-size:26px;margin-bottom:6px}
-.upload-zone strong{font-size:13px;color:var(--slate);display:block;margin-bottom:3px}
-.upload-zone p{font-size:12px;color:var(--muted)}
-.preview-grid{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.preview-thumb{position:relative;width:76px;height:56px;border-radius:4px;overflow:hidden;border:1px solid var(--border);flex-shrink:0}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-zone-icon{font-size:24px;margin-bottom:5px}
+.upload-zone strong{font-size:13px;color:var(--slate);display:block;margin-bottom:2px}
+.upload-zone p{font-size:11px;color:var(--muted)}
+.preview-grid{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.preview-thumb{position:relative;width:72px;height:52px;border-radius:4px;overflow:hidden;border:1px solid var(--border);flex-shrink:0}
 .preview-thumb img{width:100%;height:100%;object-fit:cover}
-.preview-thumb .remove-btn{position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:50%;background:rgba(28,43,58,.7);color:#fff;border:none;cursor:pointer;font-size:9px;display:flex;align-items:center;justify-content:center;line-height:1}
-.autofill-notice{display:none;background:var(--green-lt);border:1px solid rgba(26,122,74,.25);border-radius:var(--rsm);padding:10px 14px;font-size:12px;color:var(--green);font-weight:500;margin-top:10px;align-items:center;gap:8px}
-.autofill-notice.show{display:flex}
-.cta-btn{width:100%;padding:14px;background:var(--terra);color:#fff;border:none;border-radius:var(--r);font-family:var(--sans);font-size:15px;font-weight:600;cursor:pointer;transition:all .18s}
-.cta-btn:hover{background:var(--terra-dk);transform:translateY(-1px);box-shadow:var(--shadow-md)}
-.cta-btn:disabled{opacity:.4;cursor:default;transform:none;box-shadow:none}
+.preview-thumb .rm{position:absolute;top:2px;right:2px;width:15px;height:15px;border-radius:50%;background:rgba(28,43,58,.75);color:#fff;border:none;cursor:pointer;font-size:9px;display:flex;align-items:center;justify-content:center}
+.autofill-bar{display:none;background:var(--green-lt);border:1px solid rgba(26,122,74,.2);border-radius:var(--rsm);padding:9px 13px;font-size:12px;color:var(--green);font-weight:500;margin-bottom:14px;gap:7px;align-items:flex-start}
+.autofill-bar.show{display:flex}
+/* Multi-select compliance */
+.compliance-multi{display:flex;flex-wrap:wrap;gap:6px}
+.comp-btn{font-size:11px;padding:5px 11px;border-radius:16px;border:1.5px solid var(--border);background:var(--white);color:var(--muted);cursor:pointer;font-family:var(--sans);font-weight:500;transition:all .15s}
+.comp-btn:hover{border-color:var(--border-dk);color:var(--slate)}
+.comp-btn.selected{background:var(--slate);color:#fff;border-color:var(--slate)}
+.ctx-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:500px){.ctx-grid{grid-template-columns:1fr}}
+.field select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--rsm);font-family:var(--sans);font-size:13px;color:var(--slate);background:var(--white);outline:none;transition:border-color .2s}
+.field select:focus{border-color:var(--terra)}
+.cta-btn{width:100%;padding:14px;background:var(--terra);color:#fff;border:none;border-radius:var(--r);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:all .18s;margin-top:4px}
+.cta-btn:hover:not(:disabled){background:var(--terra-dk);transform:translateY(-1px);box-shadow:var(--shadow-md)}
+.cta-btn:disabled{opacity:.4;cursor:default;transform:none}
 
-/* ── SCREEN 2: REVIEW SCREEN ── */
-#s-review{flex-direction:column;overflow:hidden}
-.review-header{padding:16px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;background:var(--white)}
+/* ── SCREEN 2: REVIEW ── */
+#s-review{background:var(--stone)}
+.review-header{padding:16px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;background:var(--white);flex-wrap:wrap;gap:10px;position:sticky;top:54px;z-index:40}
 .review-header h2{font-family:var(--serif);font-size:18px;color:var(--slate)}
-.review-header p{font-size:12px;color:var(--muted);margin-top:2px}
-.confidence-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:12px;background:var(--green-lt);color:var(--green)}
-.review-body{flex:1;overflow-y:auto;padding:20px 28px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.review-hcard{background:var(--white);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);transition:border-color .2s}
-.review-hcard:hover{border-color:var(--border-dk)}
-.hcard-header{padding:12px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
+.review-header p{font-size:11px;color:var(--muted);margin-top:2px}
+.conf-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:12px}
+.review-grid{padding:20px 24px;display:grid;gap:14px;grid-template-columns:repeat(2,1fr)}
+@media(max-width:900px){.review-grid{grid-template-columns:1fr}}
+@media(min-width:1300px){.review-grid{grid-template-columns:repeat(3,1fr)}}
+.hcard{background:var(--white);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
+.hcard-head{padding:12px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
 .hcard-code{width:28px;height:28px;border-radius:5px;background:var(--slate);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--terra);flex-shrink:0}
-.hcard-info{flex:1}
-.hcard-name{font-size:12px;font-weight:600;color:var(--slate)}
-.hcard-theory{font-size:10px;color:var(--muted);margin-top:1px}
-.hcard-score-wrap{display:flex;align-items:center;gap:8px}
-.hcard-score{font-family:var(--serif);font-size:22px;font-weight:700}
-.hcard-score-bar{width:60px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
-.hcard-score-fill{height:100%;border-radius:2px;transition:width .5s ease}
+.hcard-info{flex:1;min-width:0}
+.hcard-name{font-size:12px;font-weight:600;color:var(--slate);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hcard-theory{font-size:10px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hcard-score{font-family:var(--serif);font-size:22px;font-weight:700;flex-shrink:0}
 .hcard-body{padding:10px 14px}
-.criterion-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--stone2)}
-.criterion-row:last-child{border-bottom:none}
-.criterion-text{flex:1;font-size:11px;color:var(--slate)}
-.criterion-weight-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.mini-toggles{display:flex;gap:3px}
-.mini-btn{font-size:9px;font-weight:600;padding:3px 7px;border-radius:4px;border:1px solid var(--border);background:var(--white);cursor:pointer;color:var(--muted);transition:all .14s;white-space:nowrap}
-.mini-btn.confirmed{background:var(--green-lt);border-color:var(--green);color:var(--green)}
-.mini-btn.partial{background:var(--amber-lt);border-color:var(--amber);color:var(--amber)}
-.mini-btn.absent{background:var(--red-lt);border-color:var(--red);color:var(--red)}
-.review-footer{padding:14px 28px;border-top:1px solid var(--border);background:var(--white);display:flex;align-items:center;gap:12px}
-.review-summary{font-size:13px;color:var(--muted)}
-.review-summary strong{color:var(--terra);font-family:var(--serif);font-size:16px}
-.btn-score{padding:11px 28px;background:var(--terra);color:#fff;border:none;border-radius:var(--rsm);font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;transition:all .18s;margin-left:auto}
-.btn-score:hover{background:var(--terra-dk)}
-.btn-back-entry{padding:11px 18px;background:none;border:1px solid var(--border);border-radius:var(--rsm);font-family:var(--sans);font-size:13px;font-weight:500;color:var(--muted);cursor:pointer}
-.btn-back-entry:hover{color:var(--slate);border-color:var(--border-dk)}
-.source-badge{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600}
-.source-research{background:var(--terra-dim);color:var(--terra-dk)}
-.source-screenshot{background:var(--green-lt);color:var(--green)}
-.source-default{background:var(--stone2);color:var(--muted)}
+.cr-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--stone2)}
+.cr-row:last-child{border-bottom:none}
+.cr-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.cr-label{flex:1;font-size:11px;color:var(--slate)}
+.cr-src{font-size:9px;font-weight:600;padding:2px 6px;border-radius:8px;flex-shrink:0}
+.src-research{background:var(--terra-dim);color:var(--terra-dk)}
+.src-manual{background:var(--stone2);color:var(--muted)}
+.mini-togs{display:flex;gap:3px}
+.mini-tog{font-size:9px;font-weight:600;padding:3px 6px;border-radius:4px;border:1px solid var(--border);background:var(--white);cursor:pointer;color:var(--muted);transition:all .12s}
+.mini-tog.confirmed{background:var(--green-lt);border-color:var(--green);color:var(--green)}
+.mini-tog.partial{background:var(--amber-lt);border-color:var(--amber);color:var(--amber)}
+.mini-tog.absent{background:var(--red-lt);border-color:var(--red);color:var(--red)}
+.review-footer{padding:14px 24px;border-top:1px solid var(--border);background:var(--white);display:flex;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;bottom:0;z-index:40}
+.est-score-label{font-size:13px;color:var(--muted)}
+.est-score-label strong{font-family:var(--serif);font-size:17px}
+.btn-generate{padding:11px 24px;background:var(--terra);color:#fff;border:none;border-radius:var(--rsm);font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;transition:all .18s;margin-left:auto;white-space:nowrap}
+.btn-generate:hover{background:var(--terra-dk)}
+.btn-back{padding:11px 16px;background:none;border:1px solid var(--border);border-radius:var(--rsm);font-family:var(--sans);font-size:12px;font-weight:500;color:var(--muted);cursor:pointer}
+.btn-back:hover{color:var(--slate);border-color:var(--border-dk)}
 
 /* ── SCREEN 3: RESULTS ── */
-#s-results{flex-direction:column;overflow:hidden;background:var(--stone)}
-.results-topbar{padding:18px 28px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:20px;flex-shrink:0}
-.results-topbar h2{font-family:var(--serif);font-size:20px;color:var(--slate)}
-.results-total{font-family:var(--serif);font-size:40px;line-height:1;color:var(--slate)}
-.results-denom{font-size:16px;color:var(--muted)}
-.band-pill{font-size:11px;font-weight:600;padding:4px 14px;border-radius:20px;margin-left:10px;vertical-align:middle;display:inline-block}
-.results-body{flex:1;overflow-y:auto;padding:20px 28px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+#s-results{background:var(--stone)}
+.results-header{padding:18px 24px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:20px;flex-wrap:wrap;position:sticky;top:54px;z-index:40}
+.results-header h2{font-family:var(--serif);font-size:20px;color:var(--slate)}
+.results-total-num{font-family:var(--serif);font-size:38px;line-height:1;color:var(--slate)}
+.results-total-denom{font-size:16px;color:var(--muted)}
+.band-pill{font-size:11px;font-weight:600;padding:4px 14px;border-radius:20px;margin-left:8px;vertical-align:middle;display:inline-block}
+.results-grid{padding:20px 24px;display:grid;gap:16px;grid-template-columns:repeat(2,1fr)}
+@media(max-width:900px){.results-grid{grid-template-columns:1fr}}
+@media(min-width:1300px){.results-grid{grid-template-columns:repeat(2,1fr)}}
 .res-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);padding:18px}
-.res-card h3{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--terra);margin-bottom:14px}
-.radar-wrap{height:240px;position:relative}
-.score-tbl-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--stone2)}
-.score-tbl-row:last-child{border-bottom:none}
-.st-code{font-size:10px;font-weight:700;color:var(--muted);width:26px}
-.st-name{font-size:12px;color:var(--slate);flex:1}
-.st-bar-bg{width:70px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
-.st-bar-fill{height:100%;border-radius:2px}
-.st-score{font-family:var(--serif);font-size:15px;min-width:32px;text-align:right}
+.res-card-title{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--terra);margin-bottom:14px}
+.radar-wrap{height:260px;position:relative}
+.stbl-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--stone2)}
+.stbl-row:last-child{border-bottom:none}
+.stbl-code{font-size:10px;font-weight:700;color:var(--muted);width:26px;flex-shrink:0}
+.stbl-name{font-size:12px;color:var(--slate);flex:1}
+.stbl-bar-bg{width:70px;height:4px;background:var(--border);border-radius:2px;overflow:hidden;flex-shrink:0}
+.stbl-bar-fill{height:100%;border-radius:2px}
+.stbl-score{font-family:var(--serif);font-size:14px;min-width:30px;text-align:right;flex-shrink:0}
 .rec-list{display:flex;flex-direction:column;gap:10px}
 .rec-item{padding:11px 13px;border-radius:var(--rsm);border-left:3px solid transparent;font-size:12px;line-height:1.55}
 .rec-item.gap{background:var(--red-lt);border-color:var(--red)}
-.rec-item.config{background:var(--amber-lt);border-color:var(--amber)}
-.rec-item.strength{background:var(--green-lt);border-color:var(--green)}
-.rec-item .rec-label{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px;display:block}
+.rec-item.cfg{background:var(--amber-lt);border-color:var(--amber)}
+.rec-item.str{background:var(--green-lt);border-color:var(--green)}
+.rec-label{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px;display:block}
 .rec-item.gap .rec-label{color:var(--red)}
-.rec-item.config .rec-label{color:var(--amber)}
-.rec-item.strength .rec-label{color:var(--green)}
-.evidence-img-grid{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
-.evidence-img{width:80px;height:56px;border-radius:4px;object-fit:cover;border:1px solid var(--border)}
-.ctx-line{font-size:12px;color:var(--muted);margin-bottom:5px}
-.ctx-line strong{color:var(--slate)}
-.results-actions{padding:14px 28px;background:var(--white);border-top:1px solid var(--border);display:flex;gap:10px;flex-shrink:0}
-.btn-export{padding:10px 22px;background:var(--slate);color:#fff;border:none;border-radius:var(--rsm);font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px}
+.rec-item.cfg .rec-label{color:var(--amber)}
+.rec-item.str .rec-label{color:var(--green)}
+.ev-img-grid{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.ev-img{width:80px;height:56px;border-radius:4px;object-fit:cover;border:1px solid var(--border)}
+.ctx-row{font-size:12px;color:var(--muted);margin-bottom:5px}
+.ctx-row strong{color:var(--slate)}
+.results-actions{padding:14px 24px;background:var(--white);border-top:1px solid var(--border);display:flex;gap:10px;flex-wrap:wrap;position:sticky;bottom:0;z-index:40}
+.btn-export{padding:10px 22px;background:var(--slate);color:#fff;border:none;border-radius:var(--rsm);font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap}
 .btn-export:hover{background:var(--slate-mid)}
-.btn-restart{padding:10px 22px;background:none;border:1px solid var(--border);border-radius:var(--rsm);font-family:var(--sans);font-size:13px;font-weight:500;color:var(--muted);cursor:pointer}
-.btn-restart:hover{color:var(--slate);border-color:var(--border-dk)}
+.btn-new{padding:10px 22px;background:none;border:1px solid var(--border);border-radius:var(--rsm);font-family:var(--sans);font-size:13px;color:var(--muted);cursor:pointer;font-weight:500}
+.btn-new:hover{color:var(--slate);border-color:var(--border-dk)}
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-thumb{background:var(--border-dk);border-radius:2px}
 </style>
 </head>
 <body>
+
 <div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
+
 <div class="topbar">
   <div class="logo">
     <div class="logo-mark">DQ</div>
-    <div><div class="logo-name">DQF-M Scorer</div><div class="logo-sub">Documentation Quality Framework for Manufacturing &middot; Northeastern University 2026</div></div>
+    <div>
+      <div class="logo-name">DQF-M Scorer</div>
+      <div class="logo-sub">Documentation Quality Framework for Manufacturing &middot; Northeastern University 2026</div>
+    </div>
   </div>
   <div class="spacer"></div>
   <div class="tool-chip" id="toolChip"><div class="chip-dot"></div><span id="toolChipName"></span></div>
   <button class="btn-ghost" onclick="restart()">Start over</button>
 </div>
 
-<!-- SCREEN 1: SMART ENTRY -->
+<!-- SCREEN 1: ENTRY -->
 <div class="screen active" id="s-entry">
-<div class="entry-inner">
-  <div class="entry-eyebrow">Research Instrument &mdash; Raja Antony Mandal, MS DMC 2026</div>
-  <h1 class="entry-title">Evaluate any AI SOP tool against six manufacturing heuristics</h1>
-  <p class="entry-sub">Select a known tool for instant pre-filled scoring based on published research, or enter any tool and upload screenshots. Review and adjust, then get your results and recommendations in one click.</p>
+  <div class="entry-layout">
 
-  <div class="entry-card">
-    <div class="entry-card-title">Step 1 &mdash; Select or enter the tool being evaluated</div>
-    <div class="field">
-      <label>Known tools (click to pre-fill from research)</label>
-      <div class="known-tools" id="knownTools"></div>
-    </div>
-    <div class="field">
-      <label>Or enter any tool name</label>
-      <input type="text" id="toolInput" placeholder="e.g. MasterControl, ETQ Reliance, Qualio..." oninput="onToolInput(this.value)">
-    </div>
-    <div class="autofill-notice" id="autofillNotice">
-      <span>&#10003;</span>
-      <span id="autofillMsg">Research data loaded — 30 criteria pre-filled from DQF-M study findings. Review and adjust below.</span>
-    </div>
-  </div>
-
-  <div class="entry-card">
-    <div class="entry-card-title">Step 2 &mdash; Upload screenshots <span style="font-weight:400;color:var(--muted)">(optional &mdash; up to 5)</span></div>
-    <div class="upload-zone" id="uploadZone" ondrop="handleDrop(event)" ondragover="e=>e.preventDefault()">
-      <input type="file" id="fileInput" multiple accept="image/*" onchange="handleFiles(this.files)">
-      <div class="upload-zone-icon">&#128247;</div>
-      <strong>Click to upload or drag &amp; drop</strong>
-      <p>UI screenshots, pricing page, DPA, settings &mdash; any visual evidence</p>
-    </div>
-    <div class="preview-grid" id="previewGrid"></div>
-  </div>
-
-  <div class="entry-card">
-    <div class="entry-card-title">Step 3 &mdash; Your organization context <span style="font-weight:400;color:var(--muted)">(shapes recommendations)</span></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-      <div class="field" style="margin-bottom:0">
-        <label>Industry</label>
-        <select id="ctx-industry">
-          <option value="">Select industry</option>
-          <option>Automotive manufacturing</option><option>Aerospace &amp; defense</option>
-          <option>Medical device manufacturing</option><option>Electronics manufacturing</option>
-          <option>Food &amp; beverage manufacturing</option><option>General manufacturing</option>
-        </select>
-      </div>
-      <div class="field" style="margin-bottom:0">
-        <label>Compliance standard</label>
-        <select id="ctx-compliance">
-          <option value="">Select standard</option>
-          <option>ISO 9001:2015</option><option>ISO 13485 (Medical)</option>
-          <option>AS9100 (Aerospace)</option><option>IATF 16949 (Automotive)</option>
-          <option>FDA 21 CFR Part 11</option><option>Multiple standards</option>
-        </select>
+    <!-- Left panel: branding + heuristic list -->
+    <div class="entry-left">
+      <div class="entry-eyebrow">Research Instrument &mdash; Raja Antony Mandal, MS DMC 2026</div>
+      <h1 class="entry-title">Evaluate any AI SOP tool against six manufacturing heuristics</h1>
+      <p class="entry-sub">Select a known tool for instant pre-filled scoring from published research. Upload screenshots as evidence. Review in seconds, not minutes.</p>
+      <div class="h-pill-grid">
+        <div class="h-pill-row"><div class="h-pill-code">H1</div><div class="h-pill-text"><div class="h-pill-name">Linguistic Remediation by Design</div><div class="h-pill-theory">Poka-Yoke &middot; Plain Language Guidelines</div></div></div>
+        <div class="h-pill-row"><div class="h-pill-code">H2</div><div class="h-pill-text"><div class="h-pill-name">Knowledge Capture Efficiency</div><div class="h-pill-theory">Nonaka &amp; Takeuchi (1995) &middot; TAM</div></div></div>
+        <div class="h-pill-row"><div class="h-pill-code">H3</div><div class="h-pill-text"><div class="h-pill-name">Operational Continuity</div><div class="h-pill-theory">Industry 4.0 Digital Thread &middot; ISO/IEC 25010</div></div></div>
+        <div class="h-pill-row"><div class="h-pill-code">H4</div><div class="h-pill-text"><div class="h-pill-name">Regulatory Defense by Default</div><div class="h-pill-theory">Reason (1990) &middot; ISO 9001:2015 Clause 7.5</div></div></div>
+        <div class="h-pill-row"><div class="h-pill-code">H5</div><div class="h-pill-text"><div class="h-pill-name">Adoption Friction by Design</div><div class="h-pill-theory">Rogers (2003) &middot; Kotter (1996)</div></div></div>
+        <div class="h-pill-row"><div class="h-pill-code">H6</div><div class="h-pill-text"><div class="h-pill-name">Intellectual Property Sovereignty</div><div class="h-pill-theory">NIST CSF (2014) &middot; ISO 27001</div></div></div>
       </div>
     </div>
-  </div>
 
-  <button class="cta-btn" id="ctaBtn" onclick="goToReview()" disabled>Review pre-filled scores &rarr;</button>
-</div>
+    <!-- Right panel: form -->
+    <div class="entry-right">
+
+      <div class="form-section">
+        <div class="section-title">Step 1 &mdash; Select or enter the tool being evaluated</div>
+        <div class="field">
+          <label>Known tools &mdash; click to pre-fill from research</label>
+          <div class="known-chips" id="knownChips"></div>
+        </div>
+        <div class="field">
+          <label>Or enter any tool name</label>
+          <input type="text" id="toolInput" placeholder="e.g. MasterControl, ETQ Reliance, Qualio..." oninput="onToolInput(this.value)">
+        </div>
+        <div class="autofill-bar" id="autofillBar">
+          <span>&#10003;</span><span id="autofillMsg">Research data loaded.</span>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-title">Step 2 &mdash; Upload screenshots <span style="font-weight:400;color:var(--muted)">(optional &mdash; up to 5)</span></div>
+        <div class="upload-zone" id="uploadZone" ondrop="handleDrop(event)" ondragover="handleDragOver(event)">
+          <input type="file" id="fileInput" multiple accept="image/*" onchange="handleFiles(this.files)">
+          <div class="upload-zone-icon">&#128247;</div>
+          <strong>Click to upload or drag &amp; drop</strong>
+          <p>UI screenshots, pricing page, DPA, settings &mdash; any visual evidence</p>
+        </div>
+        <div class="preview-grid" id="previewGrid"></div>
+      </div>
+
+      <div class="form-section">
+        <div class="section-title">Step 3 &mdash; Organization context <span style="font-weight:400;color:var(--muted)">(shapes recommendations)</span></div>
+        <div class="ctx-grid">
+          <div class="field" style="margin-bottom:0">
+            <label>Industry</label>
+            <select id="ctx-industry">
+              <option value="">Select industry</option>
+              <option>Automotive manufacturing</option>
+              <option>Aerospace &amp; defense</option>
+              <option>Medical device manufacturing</option>
+              <option>Electronics manufacturing</option>
+              <option>Food &amp; beverage manufacturing</option>
+              <option>Chemical manufacturing</option>
+              <option>General manufacturing</option>
+            </select>
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label>Team size</label>
+            <select id="ctx-team">
+              <option value="">Select size</option>
+              <option>1&ndash;50 employees</option>
+              <option>51&ndash;250 employees</option>
+              <option>251&ndash;1,000 employees</option>
+              <option>1,001&ndash;5,000 employees</option>
+              <option>5,000+ employees</option>
+            </select>
+          </div>
+        </div>
+        <div class="field" style="margin-top:12px">
+          <label>Compliance standards (select all that apply)</label>
+          <div class="compliance-multi" id="complianceMulti">
+            <button class="comp-btn" onclick="toggleComp(this,'ISO 9001:2015')">ISO 9001:2015</button>
+            <button class="comp-btn" onclick="toggleComp(this,'ISO 13485')">ISO 13485 (Medical)</button>
+            <button class="comp-btn" onclick="toggleComp(this,'AS9100')">AS9100 (Aerospace)</button>
+            <button class="comp-btn" onclick="toggleComp(this,'IATF 16949')">IATF 16949 (Automotive)</button>
+            <button class="comp-btn" onclick="toggleComp(this,'FDA 21 CFR Part 11')">FDA 21 CFR Part 11</button>
+            <button class="comp-btn" onclick="toggleComp(this,'OSHA')">OSHA / Safety</button>
+            <button class="comp-btn" onclick="toggleComp(this,'None')">None specific</button>
+          </div>
+        </div>
+      </div>
+
+      <button class="cta-btn" id="ctaBtn" onclick="goReview()" disabled>Review pre-filled scores &rarr;</button>
+    </div>
+  </div>
 </div>
 
 <!-- SCREEN 2: REVIEW -->
@@ -229,110 +314,104 @@ html,body{height:100%;font-family:var(--sans);background:var(--white);color:var(
   <div class="review-header">
     <div>
       <h2 id="reviewTitle">Review scores</h2>
-      <p id="reviewSubtitle">Adjust any criteria that don't match your evidence</p>
+      <p id="reviewSub">Adjust any criteria that don&rsquo;t match your evidence</p>
     </div>
     <div class="spacer"></div>
-    <div class="confidence-badge" id="confidenceBadge">&#10003; Research pre-filled</div>
+    <div class="conf-badge" id="confBadge">&#10003; Research pre-filled</div>
   </div>
-  <div class="review-body" id="reviewBody"></div>
+  <div class="review-grid" id="reviewGrid"></div>
   <div class="review-footer">
-    <button class="btn-back-entry" onclick="goBack()">&#8592; Back</button>
-    <div class="review-summary">Estimated score: <strong id="estScore">—</strong> / 30</div>
-    <button class="btn-score" onclick="showResults()">Generate results &amp; recommendations &rarr;</button>
+    <button class="btn-back" onclick="goBack()">&#8592; Back</button>
+    <div class="est-score-label">Estimated score: <strong id="estScore" style="color:var(--terra)">—</strong> / 30</div>
+    <button class="btn-generate" onclick="showResults()">Generate results &amp; recommendations &rarr;</button>
   </div>
 </div>
 
 <!-- SCREEN 3: RESULTS -->
 <div class="screen" id="s-results">
-  <div class="results-topbar">
+  <div class="results-header">
     <div>
       <h2 id="resultsTitle">Results</h2>
-      <div style="font-size:12px;color:var(--muted);margin-top:2px" id="resultsCtx"></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:2px" id="resultsCtx"></div>
     </div>
     <div class="spacer"></div>
     <div>
-      <div class="results-total"><span id="totalScoreEl">—</span><span class="results-denom"> / 30</span></div>
-      <div class="band-pill" id="bandPill">—</div>
+      <span class="results-total-num" id="totalNum">—</span><span class="results-total-denom"> / 30</span>
+      <span class="band-pill" id="bandPill">—</span>
     </div>
   </div>
-  <div class="results-body" id="resultsBody"></div>
+  <div class="results-grid" id="resultsGrid"></div>
   <div class="results-actions">
     <button class="btn-export" onclick="exportPDF()">
       <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="12" y2="18"/><line x1="15" y1="15" x2="12" y2="18"/></svg>
       Export PDF
     </button>
-    <button class="btn-restart" onclick="restart()">New evaluation</button>
+    <button class="btn-new" onclick="restart()">New evaluation</button>
   </div>
 </div>
 
 <script>
-// ── HEURISTICS ───────────────────────────────────────────
-const H = [
+// ── DATA ──────────────────────────────────────────────────────
+const H=[
   {code:'H1',name:'Linguistic Remediation by Design',short:'Linguistic',
-   theory:'Poka-Yoke (Shingo, 1986) · Plain Language Guidelines · Flesch-Kincaid',
+   theory:'Poka-Yoke (Shingo, 1986) \u00b7 Plain Language Guidelines \u00b7 Flesch-Kincaid',
    criteria:[
-    {id:'h1c1',label:'Real-time readability grade display',weight:2,key:'grade'},
-    {id:'h1c2',label:'Passive voice flagging',weight:2,key:'passive'},
-    {id:'h1c3',label:'Hard stop before publication',weight:3,key:'hardstop'},
-    {id:'h1c4',label:'Jargon and acronym detection',weight:2,key:'jargon'},
-    {id:'h1c5',label:'Author cannot disable enforcement',weight:1,key:'nodisable'},
-   ],
-   verdicts:{5:'Architecturally enforced — complexity structurally impossible',4:'Strong real-time enforcement',3:'Advisory feedback present but ignorable',2:'Post-authoring detection only',1:'No readability features'},
-   recs:{5:'',4:'',3:'Escalate from advisory to hard stop: grade compliance should block publication.',2:'Implement real-time feedback during authoring, not only at completion.',1:'Introduce minimum Flesch-Kincaid Grade 7–8 enforcement as a publishing requirement.'}},
+    {id:'h1c1',label:'Real-time readability grade display',weight:2},
+    {id:'h1c2',label:'Passive voice flagging',weight:2},
+    {id:'h1c3',label:'Hard stop before publication',weight:3},
+    {id:'h1c4',label:'Jargon and acronym detection',weight:2},
+    {id:'h1c5',label:'Author cannot disable enforcement',weight:1}],
+   verdicts:{5:'Architecturally enforced',4:'Strong real-time enforcement',3:'Advisory feedback — ignorable',2:'Post-authoring detection only',1:'No readability features'},
+   recs:{5:'',4:'',3:'Escalate from advisory to hard stop: grade compliance should block publication.',2:'Implement real-time feedback during authoring, not only at completion.',1:'Introduce Flesch-Kincaid Grade 7\u20138 enforcement as a hard publishing requirement.'}},
   {code:'H2',name:'Knowledge Capture Efficiency',short:'Knowledge Capture',
-   theory:'Nonaka & Takeuchi (1995) · TAM (Davis, 1989) · Cognitive Task Analysis',
+   theory:'Nonaka & Takeuchi (1995) \u00b7 TAM (Davis, 1989)',
    criteria:[
-    {id:'h2c1',label:'Video input to structured steps',weight:3,key:'video'},
-    {id:'h2c2',label:'Voice / audio transcription',weight:2,key:'voice'},
-    {id:'h2c3',label:'Photo annotation to steps',weight:2,key:'photo'},
-    {id:'h2c4',label:'Guided prompts elicit tacit knowledge',weight:2,key:'prompts'},
-    {id:'h2c5',label:'SME draft ready in under 30 minutes',weight:1,key:'speed'},
-   ],
-   verdicts:{5:'Full externalization — expert demonstrates, tool writes',4:'Strong multimodal capture',3:'Guided prompts reduce burden but writing still required',2:'Templates only — all content authored by expert',1:'Writing expertise required simultaneously with subject expertise'},
+    {id:'h2c1',label:'Video input to structured steps',weight:3},
+    {id:'h2c2',label:'Voice / audio transcription',weight:2},
+    {id:'h2c3',label:'Photo annotation to steps',weight:2},
+    {id:'h2c4',label:'Guided prompts elicit tacit knowledge',weight:2},
+    {id:'h2c5',label:'SME draft ready in under 30 minutes',weight:1}],
+   verdicts:{5:'Full externalization \u2014 expert demonstrates, tool writes',4:'Strong multimodal capture',3:'Guided prompts reduce burden but writing still required',2:'Templates only \u2014 expert authors all content',1:'Writing expertise required simultaneously'},
    recs:{5:'',4:'',3:'Add video or voice capture to eliminate written input for shop floor SMEs.',2:'Introduce guided prompts rather than blank template fields.',1:'Redesign capture workflow around multimodal input.'}},
   {code:'H3',name:'Operational Continuity',short:'Op. Continuity',
-   theory:'Zdravkovic et al. (2022) · Industry 4.0 Digital Thread · ISO/IEC 25010',
+   theory:'Zdravkovic et al. (2022) \u00b7 Industry 4.0 Digital Thread',
    criteria:[
-    {id:'h3c1',label:'Native QMS integration',weight:3,key:'qms'},
-    {id:'h3c2',label:'Native LMS integration',weight:2,key:'lms'},
-    {id:'h3c3',label:'Shop floor display without manual push',weight:3,key:'shopfloor'},
-    {id:'h3c4',label:'Version auto-supersession',weight:2,key:'supersede'},
-    {id:'h3c5',label:'Complete audit trail without manual logging',weight:2,key:'audit'},
-   ],
-   verdicts:{5:'Unbroken digital thread — zero manual handoffs',4:'Mostly automated — one optional manual step',3:'Partial automation — thread broken at one or more points',2:'Export-dependent — all distribution manual',1:'Manual island — tool operates in isolation'},
-   recs:{5:'',4:'',3:'Map the broken points and automate the highest-risk handoff first — typically QMS or shop floor.',2:'Build one native integration to eliminate the first manual handoff.',1:'Without operational integrations this is a document editor, not a documentation system.'}},
+    {id:'h3c1',label:'Native QMS integration',weight:3},
+    {id:'h3c2',label:'Native LMS integration',weight:2},
+    {id:'h3c3',label:'Shop floor display without manual push',weight:3},
+    {id:'h3c4',label:'Version auto-supersession',weight:2},
+    {id:'h3c5',label:'Complete audit trail without manual logging',weight:2}],
+   verdicts:{5:'Unbroken digital thread \u2014 zero manual handoffs',4:'Mostly automated \u2014 one optional manual step',3:'Partial automation \u2014 thread broken at one or more points',2:'Export-dependent \u2014 all distribution manual',1:'Manual island \u2014 tool operates in isolation'},
+   recs:{5:'',4:'',3:'Automate the highest-risk handoff first \u2014 typically QMS or shop floor display.',2:'Build one native integration to eliminate the first manual handoff.',1:'Without operational integrations this is a document editor, not a documentation system.'}},
   {code:'H4',name:'Regulatory Defense by Default',short:'Regulatory',
-   theory:"Reason's Swiss Cheese Model (1990) · ISO 9001:2015 Clause 7.5",
+   theory:"Reason's Swiss Cheese Model (1990) \u00b7 ISO 9001:2015 Clause 7.5",
    criteria:[
-    {id:'h4c1',label:'Version number system-generated and mandatory',weight:3,key:'version'},
-    {id:'h4c2',label:'Approval workflow mandatory before publication',weight:3,key:'approval'},
-    {id:'h4c3',label:'Revision date auto-stamped',weight:2,key:'revdate'},
-    {id:'h4c4',label:'Superseded versions automatically archived',weight:2,key:'archive'},
-    {id:'h4c5',label:'Non-compliant publication blocked, not warned',weight:3,key:'block'},
-   ],
-   verdicts:{5:'Non-compliance structurally impossible',4:'Critical fields mandatory — minor elements optional',3:'Warnings present but dismissible',2:'Soft prompts — all fields effectively optional',1:'No compliance architecture'},
+    {id:'h4c1',label:'Version number system-generated and mandatory',weight:3},
+    {id:'h4c2',label:'Approval workflow mandatory before publication',weight:3},
+    {id:'h4c3',label:'Revision date auto-stamped',weight:2},
+    {id:'h4c4',label:'Superseded versions automatically archived',weight:2},
+    {id:'h4c5',label:'Non-compliant publication blocked, not warned',weight:3}],
+   verdicts:{5:'Non-compliance structurally impossible',4:'Critical fields mandatory',3:'Warnings present but dismissible',2:'Soft prompts \u2014 all fields effectively optional',1:'No compliance architecture'},
    recs:{5:'',4:'Audit remaining optional elements against your compliance standard.',3:'Convert dismissible warnings to hard stops for version, approval, and revision date.',2:'Rebuild the publication workflow with mandatory fields.',1:'This tool cannot be used in a regulated manufacturing environment without complete workflow redesign.'}},
   {code:'H5',name:'Adoption Friction by Design',short:'Adoption Friction',
-   theory:'TAM (Davis, 1989) · Diffusion of Innovations (Rogers, 2003) · Kotter (1996)',
+   theory:'TAM (Davis, 1989) \u00b7 Diffusion of Innovations (Rogers, 2003) \u00b7 Kotter (1996)',
    criteria:[
-    {id:'h5c1',label:'Pricing published before contract',weight:2,key:'pricing'},
-    {id:'h5c2',label:'Self-service onboarding under 2 hours',weight:3,key:'onboard'},
-    {id:'h5c3',label:'Manufacturing-specific templates included',weight:2,key:'templates'},
-    {id:'h5c4',label:'No vendor professional services required',weight:2,key:'novendor'},
-    {id:'h5c5',label:'UI language requires no writing background',weight:3,key:'uilang'},
-   ],
-   verdicts:{5:'Frictionless — any employee produces a compliant doc on day one',4:'Low friction — transparent pricing, short onboarding',3:'Guided adoption — self-deployment possible with significant effort',2:'Moderate friction — non-technical authors need an intermediary',1:'High friction — vendor-dependent, opaque pricing, UI assumes expertise'},
+    {id:'h5c1',label:'Pricing published before contract',weight:2},
+    {id:'h5c2',label:'Self-service onboarding under 2 hours',weight:3},
+    {id:'h5c3',label:'Manufacturing-specific templates included',weight:2},
+    {id:'h5c4',label:'No vendor professional services required',weight:2},
+    {id:'h5c5',label:'UI language requires no writing background',weight:3}],
+   verdicts:{5:'Frictionless \u2014 any employee produces a compliant doc on day one',4:'Low friction \u2014 transparent pricing, short onboarding',3:'Guided adoption \u2014 self-deployment possible with significant effort',2:'Moderate friction \u2014 non-technical authors need intermediary',1:'High friction \u2014 vendor-dependent, opaque pricing'},
    recs:{5:'',4:'',3:'Reduce role-specific onboarding to under 2 hours and publish full cost of ownership.',2:'Create onboarding paths specifically for non-technical manufacturing roles.',1:'This tool was designed for documentation professionals, not manufacturing employees.'}},
   {code:'H6',name:'Intellectual Property Sovereignty',short:'IP Sovereignty',
-   theory:'NIST CSF (2014) · ISO 27001 · Grant (1996) Proprietary Knowledge',
+   theory:'NIST CSF (2014) \u00b7 ISO 27001 \u00b7 Grant (1996) Proprietary Knowledge',
    criteria:[
-    {id:'h6c1',label:'Tamper-proof version date stamps',weight:2,key:'stamps'},
-    {id:'h6c2',label:'Complete user access audit log',weight:3,key:'accesslog'},
-    {id:'h6c3',label:'Explicit AI training prohibition in DPA',weight:3,key:'aiprohibit'},
-    {id:'h6c4',label:'SOC 2 Type II or ISO 27001 certified',weight:2,key:'cert'},
-    {id:'h6c5',label:'Data deletion on termination guaranteed',weight:2,key:'deletion'},
-   ],
-   verdicts:{5:'Full sovereignty — tamper-proof trail, AI prohibition, certified, guaranteed deletion',4:'Contractual ownership confirmed with certified compliance',3:'Ownership claimed in policy — unverified by independent audit',2:'Ambiguous ownership — vendor data rights present through exceptions',1:'No IP protection — vendor data rights active'},
+    {id:'h6c1',label:'Tamper-proof version date stamps',weight:2},
+    {id:'h6c2',label:'Complete user access audit log',weight:3},
+    {id:'h6c3',label:'Explicit AI training prohibition in DPA',weight:3},
+    {id:'h6c4',label:'SOC 2 Type II or ISO 27001 certified',weight:2},
+    {id:'h6c5',label:'Data deletion on termination guaranteed',weight:2}],
+   verdicts:{5:'Full sovereignty \u2014 tamper-proof trail, AI prohibition, certified',4:'Contractual ownership confirmed with certified compliance',3:'Ownership claimed in policy \u2014 unverified by independent audit',2:'Ambiguous ownership \u2014 vendor data rights present through exceptions',1:'No IP protection \u2014 vendor data rights active'},
    recs:{5:'',4:'',3:'Require SOC 2 Type II or ISO 27001 certification. Policy statements are not auditable.',2:'Do not sign without explicit DPA with AI training prohibition.',1:'This vendor poses an active IP risk. Do not use for any process you consider competitively sensitive.'}}
 ];
 
@@ -344,339 +423,253 @@ const BANDS=[
 ];
 const SC={5:'#1A7A4A',4:'#2E9E68',3:'#B45309',2:'#C0392B',1:'#8B0000'};
 
-// ── KNOWN TOOL DATABASE (from DQF-M research) ────────────────
-const KNOWN_TOOLS={
-  'Dozuki':{
-    score:20,confidence:'Research data',
-    criteria:{h1c1:'absent',h1c2:'partial',h1c3:'absent',h1c4:'absent',h1c5:'absent',
-              h2c1:'confirmed',h2c2:'partial',h2c3:'confirmed',h2c4:'confirmed',h2c5:'confirmed',
-              h3c1:'partial',h3c2:'absent',h3c3:'absent',h3c4:'confirmed',h3c5:'confirmed',
-              h4c1:'confirmed',h4c2:'confirmed',h4c3:'confirmed',h4c4:'confirmed',h4c5:'confirmed',
-              h5c1:'absent',h5c2:'absent',h5c3:'partial',h5c4:'absent',h5c5:'partial',
-              h6c1:'confirmed',h6c2:'confirmed',h6c3:'absent',h6c4:'absent',h6c5:'partial'}
-  },
-  'Poka.io':{
-    score:19,confidence:'Research data',
-    criteria:{h1c1:'absent',h1c2:'absent',h1c3:'absent',h1c4:'absent',h1c5:'absent',
-              h2c1:'confirmed',h2c2:'confirmed',h2c3:'confirmed',h2c4:'confirmed',h2c5:'confirmed',
-              h3c1:'confirmed',h3c2:'partial',h3c3:'confirmed',h3c4:'confirmed',h3c5:'confirmed',
-              h4c1:'confirmed',h4c2:'confirmed',h4c3:'confirmed',h4c4:'partial',h4c5:'partial',
-              h5c1:'absent',h5c2:'partial',h5c3:'confirmed',h5c4:'partial',h5c5:'confirmed',
-              h6c1:'partial',h6c2:'absent',h6c3:'absent',h6c4:'absent',h6c5:'partial'}
-  },
-  'Tulip':{
-    score:17,confidence:'Research data',
-    criteria:{h1c1:'absent',h1c2:'absent',h1c3:'absent',h1c4:'absent',h1c5:'absent',
-              h2c1:'confirmed',h2c2:'partial',h2c3:'confirmed',h2c4:'partial',h2c5:'partial',
-              h3c1:'confirmed',h3c2:'partial',h3c3:'confirmed',h3c4:'confirmed',h3c5:'confirmed',
-              h4c1:'partial',h4c2:'partial',h4c3:'partial',h4c4:'partial',h4c5:'absent',
-              h5c1:'absent',h5c2:'absent',h5c3:'partial',h5c4:'absent',h5c5:'partial',
-              h6c1:'partial',h6c2:'absent',h6c3:'absent',h6c4:'absent',h6c5:'partial'}
-  },
-  'Scribe':{
-    score:13,confidence:'Research data',
-    criteria:{h1c1:'absent',h1c2:'absent',h1c3:'absent',h1c4:'absent',h1c5:'absent',
-              h2c1:'absent',h2c2:'absent',h2c3:'confirmed',h2c4:'partial',h2c5:'confirmed',
-              h3c1:'absent',h3c2:'absent',h3c3:'absent',h3c4:'absent',h3c5:'partial',
-              h4c1:'absent',h4c2:'absent',h4c3:'absent',h4c4:'absent',h4c5:'absent',
-              h5c1:'confirmed',h5c2:'confirmed',h5c3:'absent',h5c4:'confirmed',h5c5:'confirmed',
-              h6c1:'partial',h6c2:'partial',h6c3:'absent',h6c4:'partial',h6c5:'partial'}
-  },
-  'Trainual':{
-    score:14,confidence:'Research data',
-    criteria:{h1c1:'absent',h1c2:'absent',h1c3:'absent',h1c4:'absent',h1c5:'absent',
-              h2c1:'absent',h2c2:'absent',h2c3:'absent',h2c4:'confirmed',h2c5:'partial',
-              h3c1:'absent',h3c2:'partial',h3c3:'absent',h3c4:'partial',h3c5:'partial',
-              h4c1:'partial',h4c2:'partial',h4c3:'partial',h4c4:'absent',h4c5:'absent',
-              h5c1:'confirmed',h5c2:'confirmed',h5c3:'absent',h5c4:'confirmed',h5c5:'confirmed',
-              h6c1:'partial',h6c2:'absent',h6c3:'absent',h6c4:'absent',h6c5:'partial'}
-  }
+const KNOWN={
+  'Dozuki':{criteria:{h1c1:'absent',h1c2:'partial',h1c3:'absent',h1c4:'absent',h1c5:'absent',h2c1:'confirmed',h2c2:'partial',h2c3:'confirmed',h2c4:'confirmed',h2c5:'confirmed',h3c1:'partial',h3c2:'absent',h3c3:'absent',h3c4:'confirmed',h3c5:'confirmed',h4c1:'confirmed',h4c2:'confirmed',h4c3:'confirmed',h4c4:'confirmed',h4c5:'confirmed',h5c1:'absent',h5c2:'absent',h5c3:'partial',h5c4:'absent',h5c5:'partial',h6c1:'confirmed',h6c2:'confirmed',h6c3:'absent',h6c4:'absent',h6c5:'partial'},score:20},
+  'Poka.io':{criteria:{h1c1:'absent',h1c2:'absent',h1c3:'absent',h1c4:'absent',h1c5:'absent',h2c1:'confirmed',h2c2:'confirmed',h2c3:'confirmed',h2c4:'confirmed',h2c5:'confirmed',h3c1:'confirmed',h3c2:'partial',h3c3:'confirmed',h3c4:'confirmed',h3c5:'confirmed',h4c1:'confirmed',h4c2:'confirmed',h4c3:'confirmed',h4c4:'partial',h4c5:'partial',h5c1:'absent',h5c2:'partial',h5c3:'confirmed',h5c4:'partial',h5c5:'confirmed',h6c1:'partial',h6c2:'absent',h6c3:'absent',h6c4:'absent',h6c5:'partial'},score:19},
+  'Tulip':{criteria:{h1c1:'absent',h1c2:'absent',h1c3:'absent',h1c4:'absent',h1c5:'absent',h2c1:'confirmed',h2c2:'partial',h2c3:'confirmed',h2c4:'partial',h2c5:'partial',h3c1:'confirmed',h3c2:'partial',h3c3:'confirmed',h3c4:'confirmed',h3c5:'confirmed',h4c1:'partial',h4c2:'partial',h4c3:'partial',h4c4:'partial',h4c5:'absent',h5c1:'absent',h5c2:'absent',h5c3:'partial',h5c4:'absent',h5c5:'partial',h6c1:'partial',h6c2:'absent',h6c3:'absent',h6c4:'absent',h6c5:'partial'},score:17},
+  'Scribe':{criteria:{h1c1:'absent',h1c2:'absent',h1c3:'absent',h1c4:'absent',h1c5:'absent',h2c1:'absent',h2c2:'absent',h2c3:'confirmed',h2c4:'partial',h2c5:'confirmed',h3c1:'absent',h3c2:'absent',h3c3:'absent',h3c4:'absent',h3c5:'partial',h4c1:'absent',h4c2:'absent',h4c3:'absent',h4c4:'absent',h4c5:'absent',h5c1:'confirmed',h5c2:'confirmed',h5c3:'absent',h5c4:'confirmed',h5c5:'confirmed',h6c1:'partial',h6c2:'partial',h6c3:'absent',h6c4:'partial',h6c5:'partial'},score:13},
+  'Trainual':{criteria:{h1c1:'absent',h1c2:'absent',h1c3:'absent',h1c4:'absent',h1c5:'absent',h2c1:'absent',h2c2:'absent',h2c3:'absent',h2c4:'confirmed',h2c5:'partial',h3c1:'absent',h3c2:'partial',h3c3:'absent',h3c4:'partial',h3c5:'partial',h4c1:'partial',h4c2:'partial',h4c3:'partial',h4c4:'absent',h4c5:'absent',h5c1:'confirmed',h5c2:'confirmed',h5c3:'absent',h5c4:'confirmed',h5c5:'confirmed',h6c1:'partial',h6c2:'absent',h6c3:'absent',h6c4:'absent',h6c5:'partial'},score:14}
 };
 
 // ── STATE ─────────────────────────────────────────────────────
-let state={
-  tool:'',context:{},screenshots:[],
-  criteria:{},source:{},
-  knownMatch:null
-};
+let state={tool:'',context:{industry:'',team:'',compliance:[]},screenshots:[],criteria:{},source:{},knownMatch:null};
 let radarChart=null;
 
-H.forEach(h=>{
-  state.criteria[h.code]={};
-  state.source[h.code]={};
-  h.criteria.forEach(c=>{
-    state.criteria[h.code][c.id]=null;
-    state.source[h.code][c.id]='default';
+function initCriteria(){
+  H.forEach(h=>{
+    state.criteria[h.code]={};state.source[h.code]={};
+    h.criteria.forEach(c=>{state.criteria[h.code][c.id]=null;state.source[h.code][c.id]='default';});
   });
-});
+}
+initCriteria();
 
 function getBand(t){return BANDS.find(b=>t>=b.min)||BANDS[BANDS.length-1]}
 function sc(s){return SC[s]||'#CBD1D8'}
 
-function computeHScore(hCode){
-  const h=H.find(x=>x.code===hCode),crit=state.criteria[hCode];
-  let tw=0,ew=0;
+function computeScore(hCode){
+  const h=H.find(x=>x.code===hCode),cr=state.criteria[hCode];
+  let tw=0,ew=0,answered=0;
   h.criteria.forEach(c=>{
     tw+=c.weight;
-    const v=crit[c.id];
+    const v=cr[c.id];
+    if(v!==null)answered++;
     if(v==='confirmed')ew+=c.weight;
-    else if(v==='partial')ew+=c.weight*0.5;
+    else if(v==='partial')ew+=c.weight*.5;
   });
-  const answered=Object.values(crit).filter(v=>v!==null).length;
   if(!answered)return null;
   const r=ew/tw;
   if(r>=.90)return 5;if(r>=.70)return 4;if(r>=.45)return 3;if(r>=.20)return 2;return 1;
 }
+function totalScore(){return H.reduce((s,h)=>s+(computeScore(h.code)||0),0)}
 
-function getEstTotal(){
-  return H.reduce((sum,h)=>{const s=computeHScore(h.code);return sum+(s||0)},0);
-}
+// ── KNOWN CHIPS ───────────────────────────────────────────────
+document.getElementById('knownChips').innerHTML=
+  Object.entries(KNOWN).map(([name,d])=>
+    `<div class="known-chip" id="kc-${name}" onclick="pickKnown('${name}')">${name} <span class="ks">${d.score}/30</span></div>`
+  ).join('');
 
-// ── KNOWN TOOLS CHIPS ─────────────────────────────────────────
-function renderKnownChips(){
-  const el=document.getElementById('knownTools');
-  el.innerHTML=Object.keys(KNOWN_TOOLS).map(name=>`
-    <div class="known-chip" id="chip-${name}" onclick="selectKnown('${name}')">
-      ${name} <span class="chip-score">${KNOWN_TOOLS[name].score}/30</span>
-    </div>`).join('');
-}
-
-function selectKnown(name){
+function pickKnown(name){
   document.querySelectorAll('.known-chip').forEach(c=>c.classList.remove('selected'));
-  document.getElementById('chip-'+name).classList.add('selected');
+  document.getElementById('kc-'+name).classList.add('selected');
   document.getElementById('toolInput').value=name;
-  state.tool=name;
-  state.knownMatch=name;
-  const data=KNOWN_TOOLS[name];
-  H.forEach(h=>{
-    h.criteria.forEach(c=>{
-      state.criteria[h.code][c.id]=data.criteria[c.id]||'absent';
-      state.source[h.code][c.id]='research';
-    });
-  });
-  document.getElementById('autofillMsg').textContent=`Research data loaded for ${name} — all 30 criteria pre-filled from DQF-M study findings. Review and adjust below.`;
-  document.getElementById('autofillNotice').classList.add('show');
+  state.tool=name;state.knownMatch=name;
+  const d=KNOWN[name];
+  H.forEach(h=>h.criteria.forEach(c=>{
+    state.criteria[h.code][c.id]=d.criteria[c.id]||'absent';
+    state.source[h.code][c.id]='research';
+  }));
+  showAutofill(`${name} pre-filled from DQF-M research \u2014 ${d.score}/30 baseline. Review and adjust below.`);
   document.getElementById('ctaBtn').disabled=false;
-  updateToolChip(name);
+  setToolChip(name);
 }
 
 function onToolInput(val){
   state.tool=val.trim();
   document.querySelectorAll('.known-chip').forEach(c=>c.classList.remove('selected'));
   state.knownMatch=null;
-  document.getElementById('autofillNotice').classList.remove('show');
-  if(!state.tool){document.getElementById('ctaBtn').disabled=true;return}
-  // Check for partial match
-  const match=Object.keys(KNOWN_TOOLS).find(k=>k.toLowerCase()===state.tool.toLowerCase());
-  if(match){selectKnown(match);return}
-  // Unknown tool — set all criteria to partial as intelligent default
-  H.forEach(h=>{
-    h.criteria.forEach(c=>{
-      state.criteria[h.code][c.id]='partial';
-      state.source[h.code][c.id]='default';
-    });
-  });
+  if(!state.tool){document.getElementById('ctaBtn').disabled=true;hideAutofill();return;}
+  const match=Object.keys(KNOWN).find(k=>k.toLowerCase()===state.tool.toLowerCase());
+  if(match){pickKnown(match);return;}
+  // Unknown tool: set all partial as baseline
+  H.forEach(h=>h.criteria.forEach(c=>{
+    state.criteria[h.code][c.id]='partial';
+    state.source[h.code][c.id]='default';
+  }));
+  hideAutofill();
   document.getElementById('ctaBtn').disabled=false;
-  updateToolChip(state.tool);
+  setToolChip(state.tool);
 }
 
-function updateToolChip(name){
-  document.getElementById('toolChipName').textContent=name;
-  document.getElementById('toolChip').classList.add('show');
+function showAutofill(msg){
+  document.getElementById('autofillMsg').textContent=msg;
+  document.getElementById('autofillBar').classList.add('show');
+}
+function hideAutofill(){document.getElementById('autofillBar').classList.remove('show')}
+function setToolChip(name){document.getElementById('toolChipName').textContent=name;document.getElementById('toolChip').classList.add('show')}
+
+// ── COMPLIANCE MULTI-SELECT ───────────────────────────────────
+function toggleComp(btn,val){
+  btn.classList.toggle('selected');
+  if(btn.classList.contains('selected')){
+    if(!state.context.compliance.includes(val))state.context.compliance.push(val);
+  }else{
+    state.context.compliance=state.context.compliance.filter(v=>v!==val);
+  }
 }
 
 // ── SCREENSHOTS ───────────────────────────────────────────────
+function handleDragOver(e){e.preventDefault()}
+function handleDrop(e){e.preventDefault();handleFiles(e.dataTransfer.files)}
 function handleFiles(files){
   Array.from(files).slice(0,5-state.screenshots.length).forEach(f=>{
     if(!f.type.startsWith('image/'))return;
-    const reader=new FileReader();
-    reader.onload=e=>{
-      state.screenshots.push({name:f.name,dataUrl:e.target.result});
-      renderPreviews();
-      // Upgrade source badges for screenshot evidence
-      if(state.screenshots.length>0){
-        const notice=document.getElementById('autofillNotice');
-        if(notice.classList.contains('show')){
-          document.getElementById('autofillMsg').textContent=
-            `${state.tool} research data loaded + ${state.screenshots.length} screenshot(s) uploaded as evidence. Review scores below.`;
-        }
-      }
-    };
-    reader.readAsDataURL(f);
+    const r=new FileReader();
+    r.onload=e=>{state.screenshots.push({name:f.name,dataUrl:e.target.result});renderPreviews();};
+    r.readAsDataURL(f);
   });
 }
-function handleDrop(e){e.preventDefault();handleFiles(e.dataTransfer.files)}
-
 function renderPreviews(){
-  document.getElementById('previewGrid').innerHTML=state.screenshots.map((s,i)=>`
-    <div class="preview-thumb">
-      <img src="${s.dataUrl}" alt="${s.name}">
-      <button class="remove-btn" onclick="removeScreenshot(${i})">&#215;</button>
-    </div>`).join('');
+  document.getElementById('previewGrid').innerHTML=state.screenshots.map((s,i)=>
+    `<div class="preview-thumb"><img src="${s.dataUrl}"><button class="rm" onclick="rmShot(${i})">&#215;</button></div>`
+  ).join('');
 }
-function removeScreenshot(i){state.screenshots.splice(i,1);renderPreviews()}
+function rmShot(i){state.screenshots.splice(i,1);renderPreviews()}
 
 // ── REVIEW SCREEN ─────────────────────────────────────────────
-function goToReview(){
-  state.context={
-    industry:document.getElementById('ctx-industry').value,
-    compliance:document.getElementById('ctx-compliance').value
-  };
-  document.getElementById('reviewTitle').textContent=`Review scores — ${state.tool}`;
-  document.getElementById('reviewSubtitle').textContent=
-    state.knownMatch
-      ? 'Pre-filled from DQF-M research. Adjust any criteria that don\'t match your evidence.'
-      : 'Default scores applied. Toggle each criterion based on what you observe in the tool.';
-  const badge=document.getElementById('confidenceBadge');
-  badge.textContent=state.knownMatch?'✓ Research pre-filled':'○ Default — please review';
-  badge.style.background=state.knownMatch?'var(--green-lt)':'var(--amber-lt)';
-  badge.style.color=state.knownMatch?'var(--green)':'var(--amber)';
-  renderReviewCards();
-  showScreen('s-review');
+function goReview(){
+  state.context.industry=document.getElementById('ctx-industry').value;
+  state.context.team=document.getElementById('ctx-team').value;
+  document.getElementById('reviewTitle').textContent='Review scores \u2014 '+state.tool;
+  document.getElementById('reviewSub').textContent=state.knownMatch
+    ?'Pre-filled from DQF-M research. Adjust anything that doesn\u2019t match your evidence.'
+    :'Default scores applied. Toggle each criterion based on what you observe.';
+  const cb=document.getElementById('confBadge');
+  if(state.knownMatch){cb.textContent='\u2713 Research pre-filled';cb.style.background='var(--green-lt)';cb.style.color='var(--green)';}
+  else{cb.textContent='\u25cb Defaults applied \u2014 please review';cb.style.background='var(--amber-lt)';cb.style.color='var(--amber)';}
+  renderReview();
+  showScr('s-review');
   document.getElementById('progFill').style.width='55%';
 }
 
-function renderReviewCards(){
-  document.getElementById('reviewBody').innerHTML=H.map(h=>{
-    const score=computeHScore(h.code);
-    const col=score?sc(score):'#CBD1D8';
-    const pct=score?score/5*100:0;
-    return`<div class="review-hcard">
-      <div class="hcard-header">
+function renderReview(){
+  document.getElementById('reviewGrid').innerHTML=H.map(h=>{
+    const s=computeScore(h.code),col=s?sc(s):'#CBD1D8',pct=s?s/5*100:0;
+    return`<div class="hcard">
+      <div class="hcard-head">
         <div class="hcard-code">${h.code}</div>
-        <div class="hcard-info">
-          <div class="hcard-name">${h.name}</div>
-          <div class="hcard-theory">${h.theory}</div>
-        </div>
-        <div class="hcard-score-wrap">
-          <div class="hcard-score" style="color:${col}">${score||'—'}</div>
-          <div>
-            <div class="hcard-score-bar"><div class="hcard-score-fill" style="width:${pct}%;background:${col}"></div></div>
-            <div style="font-size:9px;color:var(--muted);margin-top:2px;text-align:right">/ 5</div>
-          </div>
-        </div>
+        <div class="hcard-info"><div class="hcard-name">${h.name}</div><div class="hcard-theory">${h.theory}</div></div>
+        <div class="hcard-score" style="color:${col}">${s||'\u2014'}</div>
       </div>
       <div class="hcard-body">
         ${h.criteria.map(c=>{
-          const val=state.criteria[h.code][c.id];
-          const src=state.source[h.code][c.id];
-          const srcLabel=src==='research'?'Research':src==='screenshot'?'Screenshot':'';
-          const wc=c.weight>=3?'#C0784A':c.weight===2?'#9CA3AF':'#CBD1D8';
-          return`<div class="criterion-row">
-            <div class="criterion-weight-dot" style="background:${wc}"></div>
-            <div class="criterion-text">${c.label}${srcLabel?`<span class="source-badge source-${src}" style="margin-left:6px">${srcLabel}</span>`:''}</div>
-            <div class="mini-toggles">
-              <button class="mini-btn ${val==='confirmed'?'confirmed':''}" onclick="setCrit('${h.code}','${c.id}','confirmed',this)">&#10003;</button>
-              <button class="mini-btn ${val==='partial'?'partial':''}" onclick="setCrit('${h.code}','${c.id}','partial',this)">&#126;</button>
-              <button class="mini-btn ${val==='absent'?'absent':''}" onclick="setCrit('${h.code}','${c.id}','absent',this)">&#10007;</button>
+          const v=state.criteria[h.code][c.id],src=state.source[h.code][c.id];
+          const wc=c.weight>=3?'#C0784A':c.weight===2?'#9CA3AF':'#E2E6EA';
+          return`<div class="cr-row">
+            <div class="cr-dot" style="background:${wc}"></div>
+            <div class="cr-label">${c.label}</div>
+            ${src==='research'?'<span class="cr-src src-research">Research</span>':''}
+            <div class="mini-togs">
+              <button class="mini-tog ${v==='confirmed'?'confirmed':''}" onclick="setCrit('${h.code}','${c.id}','confirmed')">&#10003;</button>
+              <button class="mini-tog ${v==='partial'?'partial':''}" onclick="setCrit('${h.code}','${c.id}','partial')">~</button>
+              <button class="mini-tog ${v==='absent'?'absent':''}" onclick="setCrit('${h.code}','${c.id}','absent')">&#10007;</button>
             </div>
           </div>`;
         }).join('')}
       </div>
     </div>`;
   }).join('');
-  updateEstScore();
+  updateEst();
 }
 
-function setCrit(hCode,cId,val,btn){
-  const cur=state.criteria[hCode][cId];
-  state.criteria[hCode][cId]=cur===val?null:val;
+function setCrit(hCode,cId,val){
+  state.criteria[hCode][cId]=state.criteria[hCode][cId]===val?null:val;
   state.source[hCode][cId]='manual';
-  renderReviewCards();
+  renderReview();
 }
 
-function updateEstScore(){
-  const t=getEstTotal();
-  document.getElementById('estScore').textContent=t||'—';
+function updateEst(){
+  const t=totalScore();
   const el=document.getElementById('estScore');
+  el.textContent=t||'\u2014';
   if(t){const b=getBand(t);el.style.color=b.color;}
 }
 
 // ── RESULTS ───────────────────────────────────────────────────
 function showResults(){
-  H.forEach(h=>{const s=computeHScore(h.code);if(s){}});
-  const total=getEstTotal();
-  const band=getBand(total);
-
-  document.getElementById('totalScoreEl').textContent=total;
-  document.getElementById('resultsTitle').textContent=`${state.tool} — DQF-M Evaluation`;
-  const ctxParts=[state.context.industry,state.context.compliance].filter(Boolean);
-  document.getElementById('resultsCtx').textContent=ctxParts.join(' · ')||'DQF-M Framework Evaluation';
+  const total=totalScore(),band=getBand(total);
+  document.getElementById('totalNum').textContent=total;
+  document.getElementById('resultsTitle').textContent=state.tool+' \u2014 DQF-M Evaluation';
+  const ctxParts=[state.context.industry,state.context.team,...(state.context.compliance||[])].filter(Boolean);
+  document.getElementById('resultsCtx').textContent=ctxParts.join(' \u00b7 ')||'DQF-M Framework Evaluation';
   const pill=document.getElementById('bandPill');
   pill.textContent=band.label;pill.style.background=band.bg;pill.style.color=band.color;
 
-  const low=H.filter(h=>computeHScore(h.code)<=2);
-  const mid=H.filter(h=>computeHScore(h.code)===3);
-  const high=H.filter(h=>computeHScore(h.code)>=4);
+  const low=H.filter(h=>(computeScore(h.code)||0)<=2);
+  const mid=H.filter(h=>computeScore(h.code)===3);
+  const high=H.filter(h=>(computeScore(h.code)||0)>=4);
 
   let recs='';
-  if(low.length)recs+=low.map(h=>`<div class="rec-item gap"><span class="rec-label">Priority gap — ${h.code} ${h.short} (${computeHScore(h.code)}/5)</span>${h.recs[computeHScore(h.code)]||''}</div>`).join('');
-  if(mid.length)recs+=mid.map(h=>`<div class="rec-item config"><span class="rec-label">Needs configuration — ${h.code} ${h.short} (${computeHScore(h.code)}/5)</span>${h.recs[computeHScore(h.code)]||''}</div>`).join('');
-  if(high.length)recs+=high.map(h=>`<div class="rec-item strength"><span class="rec-label">Strength — ${h.code} ${h.short} (${computeHScore(h.code)}/5)</span>${h.verdicts[computeHScore(h.code)]||''}</div>`).join('');
-  if(!recs)recs='<div class="rec-item strength"><span class="rec-label">Excellent</span>This tool meets enterprise documentation quality standards across all six heuristics.</div>';
+  if(low.length)recs+=low.map(h=>`<div class="rec-item gap"><span class="rec-label">Priority gap \u2014 ${h.code} ${h.short} (${computeScore(h.code)||0}/5)</span>${h.recs[computeScore(h.code)]||''}</div>`).join('');
+  if(mid.length)recs+=mid.map(h=>`<div class="rec-item cfg"><span class="rec-label">Needs configuration \u2014 ${h.code} ${h.short} (${computeScore(h.code)}/5)</span>${h.recs[computeScore(h.code)]||''}</div>`).join('');
+  if(high.length)recs+=high.map(h=>`<div class="rec-item str"><span class="rec-label">Strength \u2014 ${h.code} ${h.short} (${computeScore(h.code)}/5)</span>${h.verdicts[computeScore(h.code)]||''}</div>`).join('');
+  if(!recs)recs='<div class="rec-item str"><span class="rec-label">Excellent</span>This tool meets enterprise documentation quality standards across all six heuristics.</div>';
 
-  let evidenceHtml='';
-  if(state.screenshots.length){
-    evidenceHtml=`<div class="evidence-img-grid">${state.screenshots.map(s=>`<img class="evidence-img" src="${s.dataUrl}" alt="${s.name}">`).join('')}</div>`;
-  }
+  const evHtml=state.screenshots.length
+    ?`<div class="ev-img-grid">${state.screenshots.map(s=>`<img class="ev-img" src="${s.dataUrl}">`).join('')}</div>`:'';
 
   let ctxHtml='';
-  if(state.context.industry||state.context.compliance){
-    if(state.context.industry)ctxHtml+=`<div class="ctx-line"><strong>Industry:</strong> ${state.context.industry}</div>`;
-    if(state.context.compliance)ctxHtml+=`<div class="ctx-line"><strong>Compliance:</strong> ${state.context.compliance}</div>`;
-  }
+  if(state.context.industry)ctxHtml+=`<div class="ctx-row"><strong>Industry:</strong> ${state.context.industry}</div>`;
+  if(state.context.team)ctxHtml+=`<div class="ctx-row"><strong>Team size:</strong> ${state.context.team}</div>`;
+  if(state.context.compliance&&state.context.compliance.length)ctxHtml+=`<div class="ctx-row"><strong>Compliance:</strong> ${state.context.compliance.join(', ')}</div>`;
 
-  document.getElementById('resultsBody').innerHTML=`
+  document.getElementById('resultsGrid').innerHTML=`
     <div class="res-card">
-      <h3>Score radar — ${state.tool}</h3>
+      <div class="res-card-title">Score radar \u2014 ${state.tool}</div>
       <div class="radar-wrap"><canvas id="radarChart"></canvas></div>
     </div>
     <div class="res-card">
-      <h3>Heuristic breakdown</h3>
-      ${H.map(h=>{const s=computeHScore(h.code)||0,col=sc(s);return`
-        <div class="score-tbl-row">
-          <div class="st-code">${h.code}</div>
-          <div class="st-name">${h.name}</div>
-          <div class="st-bar-bg"><div class="st-bar-fill" style="width:${s/5*100}%;background:${col}"></div></div>
-          <div class="st-score" style="color:${col}">${s} / 5</div>
+      <div class="res-card-title">Heuristic breakdown</div>
+      ${H.map(h=>{const s=computeScore(h.code)||0,col=sc(s);return`
+        <div class="stbl-row">
+          <div class="stbl-code">${h.code}</div>
+          <div class="stbl-name">${h.name}</div>
+          <div class="stbl-bar-bg"><div class="stbl-bar-fill" style="width:${s/5*100}%;background:${col}"></div></div>
+          <div class="stbl-score" style="color:${col}">${s} / 5</div>
         </div>`}).join('')}
     </div>
     <div class="res-card">
-      <h3>Recommendations</h3>
+      <div class="res-card-title">Recommendations</div>
       <div class="rec-list">${recs}</div>
     </div>
     <div class="res-card">
-      <h3>Evidence &amp; context</h3>
-      ${evidenceHtml}
-      ${ctxHtml}
-      ${!evidenceHtml&&!ctxHtml?'<p style="font-size:12px;color:var(--muted)">No screenshots or context provided.</p>':''}
-      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--stone2)">
-        <div class="ctx-line"><strong>Data source:</strong> ${state.knownMatch?'DQF-M research findings (2024–2026)':'Manual evaluation'}</div>
-        <div class="ctx-line"><strong>Evaluator:</strong> Raja Antony Mandal</div>
-        <div class="ctx-line"><strong>Framework:</strong> DQF-M v1.0 &mdash; Six heuristics, 30-point rubric</div>
+      <div class="res-card-title">Evidence &amp; context</div>
+      ${evHtml}${ctxHtml}
+      <div style="margin-top:${evHtml||ctxHtml?'12px':'0'};padding-top:${evHtml||ctxHtml?'12px':'0'};border-top:${evHtml||ctxHtml?'1px solid var(--stone2)':'none'}">
+        <div class="ctx-row"><strong>Data source:</strong> ${state.knownMatch?'DQF-M research (2024\u20132026)':'Manual evaluation'}</div>
+        <div class="ctx-row"><strong>Framework:</strong> DQF-M v1.0 \u2014 6 heuristics, 30-point rubric</div>
+        <div class="ctx-row"><strong>Evaluator:</strong> Raja Antony Mandal, Northeastern University 2026</div>
       </div>
     </div>`;
 
-  showScreen('s-results');
+  showScr('s-results');
   document.getElementById('progFill').style.width='100%';
 
   setTimeout(()=>{
-    const data=H.map(h=>computeHScore(h.code)||0);
+    const data=H.map(h=>computeScore(h.code)||0);
     if(radarChart)radarChart.destroy();
     radarChart=new Chart(document.getElementById('radarChart').getContext('2d'),{
       type:'radar',
-      data:{labels:H.map(h=>h.code),datasets:[{
-        data,backgroundColor:'rgba(192,120,74,.1)',borderColor:'#C0784A',borderWidth:2.5,
+      data:{labels:H.map(h=>h.code),datasets:[{data,
+        backgroundColor:'rgba(192,120,74,.1)',borderColor:'#C0784A',borderWidth:2.5,
         pointBackgroundColor:data.map(v=>sc(v)),pointBorderColor:'#fff',
-        pointBorderWidth:2,pointRadius:6
-      }]},
+        pointBorderWidth:2,pointRadius:6}]},
       options:{responsive:true,maintainAspectRatio:false,
         scales:{r:{min:0,max:5,ticks:{stepSize:1,color:'#9CA3AF',backdropColor:'transparent',font:{size:9}},
           grid:{color:'rgba(0,0,0,.06)'},angleLines:{color:'rgba(0,0,0,.06)'},
           pointLabels:{color:'#1C2B3A',font:{size:11,weight:'600',family:'"Inter",sans-serif'}}}},
         plugins:{legend:{display:false}}}
     });
-  },100);
+  },120);
 }
 
 // ── EXPORT PDF ────────────────────────────────────────────────
@@ -684,89 +677,72 @@ function exportPDF(){
   const{jsPDF}=window.jspdf;
   const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
   const W=210,M=20,cw=W-M*2;let y=20;
-  doc.setFillColor(28,43,58);doc.rect(0,0,W,32,'F');
+  doc.setFillColor(28,43,58);doc.rect(0,0,W,34,'F');
   doc.setTextColor(255,255,255);doc.setFontSize(16);doc.setFont('helvetica','bold');
   doc.text('DQF-M EVALUATION REPORT',M,14);
   doc.setFontSize(9);doc.setFont('helvetica','normal');
-  doc.text(`${state.tool}  ·  ${new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}`,M,21);
-  doc.text('Documentation Quality Framework for Manufacturing  ·  Northeastern University 2026',M,27);
-  y=42;
-  const total=getEstTotal(),band=getBand(total);
-  doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(28,43,58);
-  doc.text('TOTAL SCORE',M,y);y+=6;
-  doc.setFontSize(26);doc.setTextColor(192,120,74);doc.text(`${total} / 30`,M,y);y+=6;
+  doc.text(`Tool: ${state.tool}  \u00b7  ${new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}`,M,21);
+  doc.text('Documentation Quality Framework for Manufacturing  \u00b7  Northeastern University 2026',M,28);
+  y=44;
+  const total=totalScore(),band=getBand(total);
+  doc.setFontSize(24);doc.setFont('helvetica','bold');doc.setTextColor(192,120,74);
+  doc.text(`${total} / 30`,M,y);y+=7;
   doc.setFontSize(11);doc.setTextColor(28,43,58);doc.text(band.label.toUpperCase(),M,y);y+=12;
-  if(state.context.industry||state.context.compliance){
-    doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(99,114,133);
-    const ctx=[state.context.industry,state.context.compliance].filter(Boolean).join('  ·  ');
-    doc.text(ctx,M,y);y+=10;
-  }
-  doc.setDrawColor(226,230,234);
+  const ctx=[state.context.industry,state.context.team,...(state.context.compliance||[])].filter(Boolean).join('  \u00b7  ');
+  if(ctx){doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(99,114,133);doc.text(ctx,M,y);y+=10;}
   doc.setFillColor(244,246,248);doc.rect(M,y,cw,7,'F');
   doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(99,114,133);
-  doc.text('CODE',M+2,y+5);doc.text('HEURISTIC',M+22,y+5);
-  doc.text('SCORE',M+cw-20,y+5);doc.text('VERDICT',M+cw-65,y+5);y+=9;
+  doc.text('CODE',M+2,y+5);doc.text('HEURISTIC',M+22,y+5);doc.text('SCORE',M+cw-20,y+5);doc.text('VERDICT',M+cw-65,y+5);y+=9;
   H.forEach((h,i)=>{
-    const s=computeHScore(h.code)||0;
+    const s=computeScore(h.code)||0;
     if(i%2===0){doc.setFillColor(249,250,251);doc.rect(M,y,cw,8,'F');}
     doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(192,120,74);doc.text(h.code,M+2,y+5.5);
     doc.setFont('helvetica','normal');doc.setTextColor(28,43,58);doc.text(h.name,M+22,y+5.5);
     const col=s>=4?[26,122,74]:s===3?[180,83,9]:[192,57,43];
     doc.setFont('helvetica','bold');doc.setTextColor(...col);doc.text(`${s}/5`,M+cw-18,y+5.5);
     doc.setFont('helvetica','normal');doc.setTextColor(28,43,58);
-    const v=(h.verdicts[s]||'').split('—')[0].trim().substring(0,35);
-    doc.text(v,M+cw-63,y+5.5);y+=8;
+    const vt=(h.verdicts[s]||'').substring(0,38);doc.text(vt,M+cw-63,y+5.5);y+=8;
   });
   y+=8;
   if(y>230){doc.addPage();y=20;}
-  doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(28,43,58);
-  doc.text('RECOMMENDATIONS',M,y);y+=8;
+  doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(28,43,58);doc.text('RECOMMENDATIONS',M,y);y+=8;
   H.forEach(h=>{
-    const s=computeHScore(h.code)||0,rec=h.recs[s];
-    if(!rec)return;
+    const s=computeScore(h.code)||0,rec=h.recs[s];if(!rec)return;
     if(y>255){doc.addPage();y=20;}
     const col=s<=2?[192,57,43]:s===3?[180,83,9]:[26,122,74];
     doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(...col);
     doc.text(`${h.code} ${h.short}  (${s}/5)`,M,y);y+=5;
     doc.setFont('helvetica','normal');doc.setTextColor(28,43,58);
-    const lines=doc.splitTextToSize(rec,cw);
-    lines.forEach(l=>{if(y>270){doc.addPage();y=20;}doc.text(l,M,y);y+=4.5;});
-    y+=4;
+    doc.splitTextToSize(rec,cw).forEach(l=>{if(y>268){doc.addPage();y=20;}doc.text(l,M,y);y+=4.5;});y+=4;
   });
-  const pages=doc.getNumberOfPages();
-  for(let i=1;i<=pages;i++){
+  const pg=doc.getNumberOfPages();
+  for(let i=1;i<=pg;i++){
     doc.setPage(i);doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(155,155,155);
-    doc.text('Raja Antony Mandal  ·  MS Digital Media & Communication  ·  Northeastern University 2026  ·  DQF-M Framework',M,290);
-    doc.text(`Page ${i} of ${pages}`,W-M,290,{align:'right'});
+    doc.text('Raja Antony Mandal  \u00b7  Northeastern University 2026  \u00b7  DQF-M Framework',M,290);
+    doc.text(`${i}/${pg}`,W-M,290,{align:'right'});
   }
   doc.save(`DQF-M_${state.tool.replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.pdf`);
 }
 
 // ── NAVIGATION ────────────────────────────────────────────────
-function showScreen(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-function goBack(){showScreen('s-entry');document.getElementById('progFill').style.width='0%';}
+function showScr(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
+function goBack(){showScr('s-entry');document.getElementById('progFill').style.width='0%';}
 function restart(){
-  state={tool:'',context:{},screenshots:[],criteria:{},source:{},knownMatch:null};
-  H.forEach(h=>{
-    state.criteria[h.code]={};state.source[h.code]={};
-    h.criteria.forEach(c=>{state.criteria[h.code][c.id]=null;state.source[h.code][c.id]='default';});
-  });
+  state={tool:'',context:{industry:'',team:'',compliance:[]},screenshots:[],criteria:{},source:{},knownMatch:null};
+  initCriteria();
   if(radarChart){radarChart.destroy();radarChart=null;}
   document.getElementById('toolInput').value='';
   document.getElementById('ctaBtn').disabled=true;
-  document.getElementById('autofillNotice').classList.remove('show');
+  hideAutofill();
   document.getElementById('previewGrid').innerHTML='';
   document.getElementById('toolChip').classList.remove('show');
   document.getElementById('progFill').style.width='0%';
   document.querySelectorAll('.known-chip').forEach(c=>c.classList.remove('selected'));
-  ['ctx-industry','ctx-compliance'].forEach(id=>document.getElementById(id).value='');
-  showScreen('s-entry');
+  document.querySelectorAll('.comp-btn').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('ctx-industry').value='';
+  document.getElementById('ctx-team').value='';
+  showScr('s-entry');
 }
-
-renderKnownChips();
 </script>
 </body>
 </html>
