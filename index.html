@@ -5,479 +5,335 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DQF-M Scorer — Documentation Quality Framework for Manufacturing</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --white:#FFFFFF;--slate:#1C2B3A;--slate-mid:#2E4057;--slate-lt:#637285;
+  --white:#fff;--slate:#1C2B3A;--slate-lt:#637285;--slate-mid:#2E4057;
   --terra:#C0784A;--terra-dim:#F5E6D8;--terra-dk:#96552E;
   --stone:#F4F6F8;--stone2:#EDF0F3;--border:#E2E6EA;--border-dk:#CBD1D8;
   --green:#1A7A4A;--green-lt:#E8F5EE;--amber:#B45309;--amber-lt:#FEF3C7;
-  --red:#C0392B;--red-lt:#FDECEB;
-  --serif:"DM Serif Display",Georgia,serif;
-  --sans:"Inter",system-ui,sans-serif;
-  --r:8px;--rsm:5px;
-  --shadow:0 1px 3px rgba(28,43,58,.07),0 1px 6px rgba(28,43,58,.04);
-  --shadow-md:0 4px 16px rgba(28,43,58,.09),0 1px 4px rgba(28,43,58,.05);
+  --red:#C0392B;--red-lt:#FDECEB;--muted:#9CA3AF;
+  --serif:"DM Serif Display",Georgia,serif;--sans:"Inter",system-ui,sans-serif;
+  --r:10px;--rsm:6px;--shadow:0 1px 3px rgba(28,43,58,.08),0 1px 8px rgba(28,43,58,.04);
+  --shadow-md:0 4px 16px rgba(28,43,58,.12);
 }
-html,body{height:100%;font-family:var(--sans);background:var(--white);color:var(--slate);overflow:hidden;display:flex;flex-direction:column;font-size:14px}
-
-/* ── Progress ── */
+html,body{height:100%;font-family:var(--sans);background:var(--white);color:var(--slate);overflow:hidden;display:flex;flex-direction:column}
 .prog-bar{height:3px;background:var(--stone2);flex-shrink:0}
-.prog-fill{height:100%;background:var(--terra);transition:width .4s ease;width:0%}
-
-/* ── Topbar ── */
-.topbar{display:flex;align-items:center;gap:14px;padding:0 24px;height:50px;flex-shrink:0;border-bottom:1px solid var(--border);background:var(--white)}
-.logo{display:flex;align-items:center;gap:9px}
-.logo-mark{width:28px;height:28px;border-radius:6px;background:var(--terra);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:12px;color:#fff;flex-shrink:0}
+.prog-fill{height:100%;background:var(--terra);transition:width .5s ease;width:0%}
+.topbar{display:flex;align-items:center;gap:14px;padding:0 28px;height:54px;flex-shrink:0;border-bottom:1px solid var(--border);background:var(--white)}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-mark{width:30px;height:30px;border-radius:var(--rsm);background:var(--terra);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:13px;color:#fff;flex-shrink:0}
 .logo-name{font-family:var(--serif);font-size:15px;color:var(--slate)}
-.logo-sub{font-size:10px;color:var(--slate-lt);margin-top:1px}
+.logo-sub{font-size:10px;color:var(--muted);margin-top:1px}
 .spacer{flex:1}
-.step-ind{font-size:11px;color:var(--slate-lt);font-weight:500}
-.tool-chip{display:none;align-items:center;gap:5px;background:var(--terra-dim);border:1px solid rgba(192,120,74,.3);border-radius:20px;padding:3px 10px;font-size:11px;color:var(--terra-dk);font-weight:500}
+.tool-chip{display:none;align-items:center;gap:6px;background:var(--terra-dim);border:1px solid rgba(192,120,74,.3);border-radius:20px;padding:4px 12px;font-size:12px;color:var(--terra-dk);font-weight:500}
 .tool-chip.show{display:flex}
-.chip-dot{width:5px;height:5px;border-radius:50%;background:var(--green)}
-.btn-ghost{font-size:11px;color:var(--slate-lt);background:none;border:1px solid var(--border);border-radius:var(--rsm);padding:5px 12px;cursor:pointer;font-family:var(--sans);font-weight:500;transition:all .15s}
+.chip-dot{width:6px;height:6px;border-radius:50%;background:var(--green)}
+.btn-ghost{font-size:12px;color:var(--muted);background:none;border:1px solid var(--border);border-radius:var(--rsm);padding:5px 14px;cursor:pointer;font-family:var(--sans);font-weight:500;transition:all .18s}
 .btn-ghost:hover{color:var(--slate);border-color:var(--border-dk)}
-
-/* ── Screens ── */
 .screen{display:none;flex:1;overflow:hidden}
 .screen.active{display:flex}
 
-/* ══════════════════════════════════════════════
-   WELCOME — two-column desktop layout
-══════════════════════════════════════════════ */
-#s-welcome{flex-direction:row;overflow:hidden}
-
-/* Left panel — branding + heuristic overview */
-.w-left{
-  width:380px;flex-shrink:0;
-  background:var(--slate);
-  display:flex;flex-direction:column;
-  padding:40px 36px;
-  overflow-y:auto;
-  position:relative;
-}
-.w-left::after{
-  content:'';position:absolute;top:0;right:0;width:1px;height:100%;
-  background:rgba(255,255,255,.08);
-}
-.w-eyebrow{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--terra);margin-bottom:18px}
-.w-title{font-family:var(--serif);font-size:28px;line-height:1.2;color:#fff;margin-bottom:14px}
-.w-sub{font-size:13px;color:rgba(255,255,255,.55);line-height:1.65;margin-bottom:32px}
-.w-heuristics{display:flex;flex-direction:column;gap:8px;margin-bottom:36px}
-.w-h-row{display:flex;align-items:center;gap:12px;padding:10px 12px;background:rgba(255,255,255,.05);border-radius:var(--rsm);border:1px solid rgba(255,255,255,.07)}
-.w-h-code{width:30px;height:30px;border-radius:5px;background:var(--terra);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0}
-.w-h-info{}
-.w-h-name{font-size:12px;font-weight:600;color:#fff}
-.w-h-theory{font-size:10px;color:rgba(255,255,255,.4);margin-top:2px}
-.w-footer{margin-top:auto;padding-top:24px;border-top:1px solid rgba(255,255,255,.08)}
-.w-footer-text{font-size:10px;color:rgba(255,255,255,.3);line-height:1.6}
-
-/* Right panel — the form */
-.w-right{
-  flex:1;overflow-y:auto;
-  padding:32px 36px;
-  background:var(--stone);
-}
-.w-section{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:22px 24px;margin-bottom:16px;box-shadow:var(--shadow)}
-.w-section-title{font-size:13px;font-weight:600;color:var(--slate);margin-bottom:4px}
-.w-section-sub{font-size:11px;color:var(--slate-lt);margin-bottom:18px}
-.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-.form-grid.full{grid-template-columns:1fr;margin-bottom:0}
-.field{}
-.field label{display:block;font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--slate-lt);margin-bottom:5px}
-.field input,.field select,.field textarea{
-  width:100%;padding:8px 11px;
-  border:1px solid var(--border);border-radius:var(--rsm);
-  font-family:var(--sans);font-size:13px;color:var(--slate);background:var(--white);
-  outline:none;transition:border-color .18s;
-}
-.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--terra)}
-.field textarea{resize:vertical;min-height:60px;line-height:1.55}
-
-/* Upload */
-.upload-zone{
-  border:2px dashed var(--border-dk);border-radius:var(--rsm);padding:20px;
-  text-align:center;cursor:pointer;transition:all .18s;background:var(--stone);
-  margin-top:6px;
-}
+/* ── SCREEN 1: SMART ENTRY ── */
+#s-entry{flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;overflow-y:auto;background:var(--white)}
+.entry-inner{max-width:640px;width:100%}
+.entry-eyebrow{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--terra);margin-bottom:12px}
+.entry-title{font-family:var(--serif);font-size:34px;color:var(--slate);margin-bottom:10px;line-height:1.15}
+.entry-sub{font-size:14px;color:var(--muted);line-height:1.6;margin-bottom:32px}
+.entry-card{background:var(--stone);border:1px solid var(--border);border-radius:var(--r);padding:24px;margin-bottom:16px}
+.entry-card-title{font-size:12px;font-weight:600;color:var(--slate);margin-bottom:14px}
+.field{margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:11px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.field input,.field select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--rsm);font-family:var(--sans);font-size:13px;color:var(--slate);background:var(--white);outline:none;transition:border-color .2s}
+.field input:focus,.field select:focus{border-color:var(--terra)}
+.known-tools{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.known-chip{font-size:11px;padding:4px 10px;border-radius:14px;border:1px solid var(--border);background:var(--white);color:var(--muted);cursor:pointer;transition:all .16s;font-weight:500}
+.known-chip:hover,.known-chip.selected{background:var(--terra);color:#fff;border-color:var(--terra)}
+.known-chip .chip-score{font-size:10px;margin-left:4px;opacity:.75}
+.upload-zone{border:2px dashed var(--border-dk);border-radius:var(--rsm);padding:22px;text-align:center;cursor:pointer;transition:all .2s;background:var(--white);position:relative}
 .upload-zone:hover,.upload-zone.drag{border-color:var(--terra);background:var(--terra-dim)}
-.upload-icon{font-size:22px;margin-bottom:6px;display:block}
-.upload-zone strong{font-size:12px;color:var(--slate);display:block;margin-bottom:3px}
-.upload-zone p{font-size:11px;color:var(--slate-lt)}
+.upload-zone input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.upload-zone-icon{font-size:26px;margin-bottom:6px}
+.upload-zone strong{font-size:13px;color:var(--slate);display:block;margin-bottom:3px}
+.upload-zone p{font-size:12px;color:var(--muted)}
 .preview-grid{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.preview-thumb{position:relative;width:72px;height:52px;border-radius:4px;overflow:hidden;border:1px solid var(--border)}
+.preview-thumb{position:relative;width:76px;height:56px;border-radius:4px;overflow:hidden;border:1px solid var(--border);flex-shrink:0}
 .preview-thumb img{width:100%;height:100%;object-fit:cover}
-.preview-thumb button{position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:50%;background:rgba(28,43,58,.75);color:#fff;border:none;cursor:pointer;font-size:9px;display:flex;align-items:center;justify-content:center}
+.preview-thumb .remove-btn{position:absolute;top:2px;right:2px;width:16px;height:16px;border-radius:50%;background:rgba(28,43,58,.7);color:#fff;border:none;cursor:pointer;font-size:9px;display:flex;align-items:center;justify-content:center;line-height:1}
+.autofill-notice{display:none;background:var(--green-lt);border:1px solid rgba(26,122,74,.25);border-radius:var(--rsm);padding:10px 14px;font-size:12px;color:var(--green);font-weight:500;margin-top:10px;align-items:center;gap:8px}
+.autofill-notice.show{display:flex}
+.cta-btn{width:100%;padding:14px;background:var(--terra);color:#fff;border:none;border-radius:var(--r);font-family:var(--sans);font-size:15px;font-weight:600;cursor:pointer;transition:all .18s}
+.cta-btn:hover{background:var(--terra-dk);transform:translateY(-1px);box-shadow:var(--shadow-md)}
+.cta-btn:disabled{opacity:.4;cursor:default;transform:none;box-shadow:none}
 
-/* CTA */
-.cta-btn{
-  width:100%;padding:13px;
-  background:var(--terra);color:#fff;border:none;border-radius:var(--r);
-  font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;
-  transition:all .18s;letter-spacing:.01em;
-}
-.cta-btn:hover{background:var(--terra-dk);box-shadow:var(--shadow-md)}
-.cta-btn:disabled{opacity:.4;cursor:default;box-shadow:none}
+/* ── SCREEN 2: REVIEW SCREEN ── */
+#s-review{flex-direction:column;overflow:hidden}
+.review-header{padding:16px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;background:var(--white)}
+.review-header h2{font-family:var(--serif);font-size:18px;color:var(--slate)}
+.review-header p{font-size:12px;color:var(--muted);margin-top:2px}
+.confidence-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:12px;background:var(--green-lt);color:var(--green)}
+.review-body{flex:1;overflow-y:auto;padding:20px 28px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.review-hcard{background:var(--white);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);transition:border-color .2s}
+.review-hcard:hover{border-color:var(--border-dk)}
+.hcard-header{padding:12px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border)}
+.hcard-code{width:28px;height:28px;border-radius:5px;background:var(--slate);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--terra);flex-shrink:0}
+.hcard-info{flex:1}
+.hcard-name{font-size:12px;font-weight:600;color:var(--slate)}
+.hcard-theory{font-size:10px;color:var(--muted);margin-top:1px}
+.hcard-score-wrap{display:flex;align-items:center;gap:8px}
+.hcard-score{font-family:var(--serif);font-size:22px;font-weight:700}
+.hcard-score-bar{width:60px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.hcard-score-fill{height:100%;border-radius:2px;transition:width .5s ease}
+.hcard-body{padding:10px 14px}
+.criterion-row{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--stone2)}
+.criterion-row:last-child{border-bottom:none}
+.criterion-text{flex:1;font-size:11px;color:var(--slate)}
+.criterion-weight-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.mini-toggles{display:flex;gap:3px}
+.mini-btn{font-size:9px;font-weight:600;padding:3px 7px;border-radius:4px;border:1px solid var(--border);background:var(--white);cursor:pointer;color:var(--muted);transition:all .14s;white-space:nowrap}
+.mini-btn.confirmed{background:var(--green-lt);border-color:var(--green);color:var(--green)}
+.mini-btn.partial{background:var(--amber-lt);border-color:var(--amber);color:var(--amber)}
+.mini-btn.absent{background:var(--red-lt);border-color:var(--red);color:var(--red)}
+.review-footer{padding:14px 28px;border-top:1px solid var(--border);background:var(--white);display:flex;align-items:center;gap:12px}
+.review-summary{font-size:13px;color:var(--muted)}
+.review-summary strong{color:var(--terra);font-family:var(--serif);font-size:16px}
+.btn-score{padding:11px 28px;background:var(--terra);color:#fff;border:none;border-radius:var(--rsm);font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;transition:all .18s;margin-left:auto}
+.btn-score:hover{background:var(--terra-dk)}
+.btn-back-entry{padding:11px 18px;background:none;border:1px solid var(--border);border-radius:var(--rsm);font-family:var(--sans);font-size:13px;font-weight:500;color:var(--muted);cursor:pointer}
+.btn-back-entry:hover{color:var(--slate);border-color:var(--border-dk)}
+.source-badge{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600}
+.source-research{background:var(--terra-dim);color:var(--terra-dk)}
+.source-screenshot{background:var(--green-lt);color:var(--green)}
+.source-default{background:var(--stone2);color:var(--muted)}
 
-/* ══════════════════════════════════════════════
-   HEURISTIC SCREEN
-══════════════════════════════════════════════ */
-#s-heuristic{flex-direction:row;overflow:hidden}
-.h-left{width:260px;flex-shrink:0;border-right:1px solid var(--border);display:flex;flex-direction:column;background:var(--stone);overflow-y:auto}
-.h-nav{padding:16px}
-.h-nav-title{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--slate-lt);margin-bottom:10px}
-.h-nav-item{display:flex;align-items:center;gap:9px;padding:8px 9px;border-radius:var(--rsm);margin-bottom:2px;cursor:pointer;transition:background .13s}
-.h-nav-item:hover{background:var(--stone2)}
-.h-nav-item.active{background:var(--white);box-shadow:var(--shadow)}
-.h-nav-code{width:30px;height:30px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;background:var(--stone2);color:var(--slate-lt);flex-shrink:0;transition:all .18s}
-.h-nav-item.active .h-nav-code{background:var(--terra);color:#fff}
-.h-nav-item.done .h-nav-code{background:var(--green);color:#fff}
-.h-nav-info{flex:1;min-width:0}
-.h-nav-name{font-size:11px;font-weight:600;color:var(--slate);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.h-nav-score{font-size:10px;color:var(--slate-lt);margin-top:1px}
-.h-nav-bar{height:2px;background:var(--border);border-radius:2px;margin-top:4px;overflow:hidden}
-.h-nav-bar-fill{height:100%;border-radius:2px;transition:width .4s}
-
-.h-ss-panel{padding:12px 16px;border-top:1px solid var(--border)}
-.h-ss-title{font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--slate-lt);margin-bottom:8px}
-.ss-thumbs{display:flex;gap:5px;flex-wrap:wrap}
-.ss-thumb{width:64px;height:46px;border-radius:4px;overflow:hidden;border:2px solid transparent;cursor:pointer;transition:border-color .15s}
-.ss-thumb:hover{border-color:var(--border-dk)}
-.ss-thumb.sel{border-color:var(--terra)}
-.ss-thumb img{width:100%;height:100%;object-fit:cover}
-.no-ss{font-size:11px;color:var(--slate-lt);font-style:italic}
-
-.h-right{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.h-content{flex:1;overflow-y:auto;padding:28px 32px}
-.h-eyebrow{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--terra);margin-bottom:6px}
-.h-title{font-family:var(--serif);font-size:22px;color:var(--slate);margin-bottom:3px}
-.h-theory{font-size:11px;color:var(--slate-lt);margin-bottom:14px;font-style:italic}
-.h-question{font-size:13px;color:var(--slate-mid);line-height:1.6;margin-bottom:20px;padding:12px 14px;background:var(--stone);border-left:3px solid var(--terra);border-radius:0 var(--rsm) var(--rsm) 0}
-
-/* Live score banner */
-.score-banner{display:flex;align-items:center;gap:16px;margin-bottom:20px;padding:14px 18px;background:var(--white);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow)}
-.sb-num{font-family:var(--serif);font-size:42px;line-height:1;min-width:44px}
-.sb-meta{flex:1}
-.sb-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--slate-lt);margin-bottom:5px}
-.sb-bar-bg{height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin-bottom:5px}
-.sb-bar-fill{height:100%;border-radius:3px;transition:width .5s ease,background .3s}
-.sb-verdict{font-size:11px;font-weight:500}
-
-/* Evidence panel */
-.evidence-panel{margin-bottom:18px;background:var(--stone);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
-.evidence-header{padding:8px 14px;background:var(--stone2);border-bottom:1px solid var(--border);font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--slate-lt)}
-.evidence-body{padding:12px 14px}
-.evidence-img{max-width:100%;border-radius:4px;border:1px solid var(--border);display:block;max-height:200px;object-fit:contain;background:#fff}
-.evidence-note{font-size:11px;color:var(--slate-lt);margin-top:8px;font-style:italic}
-
-/* Criteria */
-.crit-section-title{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--slate-lt);margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid var(--border)}
-.criterion{display:flex;align-items:flex-start;gap:14px;padding:11px 0;border-bottom:1px solid var(--stone2)}
-.criterion:last-child{border-bottom:none}
-.crit-text{flex:1}
-.crit-label{font-size:13px;font-weight:500;color:var(--slate);margin-bottom:2px}
-.crit-desc{font-size:11px;color:var(--slate-lt);line-height:1.5;margin-bottom:4px}
-.crit-weight{font-size:10px;color:var(--slate-lt)}
-.crit-weight.hi{color:var(--terra)}
-.toggle-group{display:flex;flex-direction:column;gap:3px;flex-shrink:0;width:94px}
-.tog{
-  padding:5px 0;border-radius:4px;border:1.5px solid var(--border);
-  background:var(--white);font-size:10px;font-weight:600;cursor:pointer;
-  font-family:var(--sans);transition:all .13s;text-align:center;color:var(--slate-lt);
-}
-.tog:hover{border-color:var(--border-dk)}
-.tog.confirmed{background:var(--green-lt);border-color:var(--green);color:var(--green)}
-.tog.partial{background:var(--amber-lt);border-color:var(--amber);color:var(--amber)}
-.tog.absent{background:var(--red-lt);border-color:var(--red);color:var(--red)}
-
-.notes-area{margin-top:18px}
-.notes-area label{font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--slate-lt);display:block;margin-bottom:5px}
-.notes-area textarea{width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:var(--rsm);font-family:var(--sans);font-size:12px;color:var(--slate);resize:vertical;min-height:60px;outline:none;transition:border-color .18s;line-height:1.5}
-.notes-area textarea:focus{border-color:var(--terra)}
-
-.h-footer{padding:13px 32px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--white);flex-shrink:0}
-.btn-back{padding:8px 18px;border:1px solid var(--border);border-radius:var(--rsm);background:var(--white);font-family:var(--sans);font-size:12px;font-weight:500;color:var(--slate-lt);cursor:pointer;transition:all .15s}
-.btn-back:hover{border-color:var(--border-dk);color:var(--slate)}
-.btn-next{padding:8px 22px;border:none;border-radius:var(--rsm);background:var(--terra);color:#fff;font-family:var(--sans);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;margin-left:auto}
-.btn-next:hover{background:var(--terra-dk)}
-.footer-score{font-size:12px;color:var(--slate-lt)}
-.footer-score strong{font-family:var(--serif);font-size:15px}
-
-/* ══════════════════════════════════════════════
-   RESULTS
-══════════════════════════════════════════════ */
+/* ── SCREEN 3: RESULTS ── */
 #s-results{flex-direction:column;overflow:hidden;background:var(--stone)}
-.res-header{padding:16px 28px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:20px;flex-shrink:0}
-.res-header h2{font-family:var(--serif);font-size:20px;color:var(--slate)}
-.res-header-sub{font-size:12px;color:var(--slate-lt);margin-top:2px}
-.res-total{font-family:var(--serif);font-size:38px;color:var(--slate);line-height:1}
-.res-denom{font-size:15px;color:var(--slate-lt)}
-.res-band{display:inline-block;font-size:11px;font-weight:600;padding:3px 12px;border-radius:20px;margin-top:4px}
-.res-body{flex:1;overflow-y:auto;padding:20px 28px;display:grid;grid-template-columns:1fr 1fr;gap:16px;align-content:start}
-.res-card{background:var(--white);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--shadow);padding:18px}
-.res-card h3{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--slate-lt);margin-bottom:14px}
+.results-topbar{padding:18px 28px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:20px;flex-shrink:0}
+.results-topbar h2{font-family:var(--serif);font-size:20px;color:var(--slate)}
+.results-total{font-family:var(--serif);font-size:40px;line-height:1;color:var(--slate)}
+.results-denom{font-size:16px;color:var(--muted)}
+.band-pill{font-size:11px;font-weight:600;padding:4px 14px;border-radius:20px;margin-left:10px;vertical-align:middle;display:inline-block}
+.results-body{flex:1;overflow-y:auto;padding:20px 28px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.res-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow);padding:18px}
+.res-card h3{font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--terra);margin-bottom:14px}
 .radar-wrap{height:240px;position:relative}
-.score-table-row{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--stone2)}
-.score-table-row:last-child{border-bottom:none}
-.st-code{font-size:10px;font-weight:700;color:var(--slate-lt);width:24px;flex-shrink:0}
+.score-tbl-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--stone2)}
+.score-tbl-row:last-child{border-bottom:none}
+.st-code{font-size:10px;font-weight:700;color:var(--muted);width:26px}
 .st-name{font-size:12px;color:var(--slate);flex:1}
-.st-bar-bg{width:70px;height:3px;background:var(--border);border-radius:2px;overflow:hidden;flex-shrink:0}
+.st-bar-bg{width:70px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
 .st-bar-fill{height:100%;border-radius:2px}
-.st-score{font-family:var(--serif);font-size:14px;min-width:28px;text-align:right;flex-shrink:0}
-.rec-item{padding:10px 12px;border-radius:var(--rsm);border-left:3px solid transparent;font-size:12px;line-height:1.55;margin-bottom:8px}
-.rec-item:last-child{margin-bottom:0}
+.st-score{font-family:var(--serif);font-size:15px;min-width:32px;text-align:right}
+.rec-list{display:flex;flex-direction:column;gap:10px}
+.rec-item{padding:11px 13px;border-radius:var(--rsm);border-left:3px solid transparent;font-size:12px;line-height:1.55}
 .rec-item.gap{background:var(--red-lt);border-color:var(--red)}
 .rec-item.config{background:var(--amber-lt);border-color:var(--amber)}
 .rec-item.strength{background:var(--green-lt);border-color:var(--green)}
-.rec-item strong{display:block;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:3px}
-.rec-item.gap strong{color:var(--red)}.rec-item.config strong{color:var(--amber)}.rec-item.strength strong{color:var(--green)}
-.ctx-summary span{display:block;font-size:12px;color:var(--slate-lt);line-height:1.7}
-.ctx-summary strong{color:var(--slate)}
-.ctx-problem{font-size:12px;color:var(--slate-lt);font-style:italic;margin-top:8px;padding-top:8px;border-top:1px solid var(--border);line-height:1.6}
-.res-actions{padding:13px 28px;background:var(--white);border-top:1px solid var(--border);display:flex;gap:9px;align-items:center;flex-shrink:0}
-.btn-export{padding:9px 20px;background:var(--slate);color:#fff;border:none;border-radius:var(--rsm);font-family:var(--sans);font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background .15s}
+.rec-item .rec-label{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px;display:block}
+.rec-item.gap .rec-label{color:var(--red)}
+.rec-item.config .rec-label{color:var(--amber)}
+.rec-item.strength .rec-label{color:var(--green)}
+.evidence-img-grid{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.evidence-img{width:80px;height:56px;border-radius:4px;object-fit:cover;border:1px solid var(--border)}
+.ctx-line{font-size:12px;color:var(--muted);margin-bottom:5px}
+.ctx-line strong{color:var(--slate)}
+.results-actions{padding:14px 28px;background:var(--white);border-top:1px solid var(--border);display:flex;gap:10px;flex-shrink:0}
+.btn-export{padding:10px 22px;background:var(--slate);color:#fff;border:none;border-radius:var(--rsm);font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:6px}
 .btn-export:hover{background:var(--slate-mid)}
-.btn-restart{padding:9px 20px;background:none;border:1px solid var(--border);border-radius:var(--rsm);font-family:var(--sans);font-size:12px;font-weight:500;color:var(--slate-lt);cursor:pointer;transition:all .15s}
-.btn-restart:hover{border-color:var(--border-dk);color:var(--slate)}
-
-/* Scrollbar */
+.btn-restart{padding:10px 22px;background:none;border:1px solid var(--border);border-radius:var(--rsm);font-family:var(--sans);font-size:13px;font-weight:500;color:var(--muted);cursor:pointer}
+.btn-restart:hover{color:var(--slate);border-color:var(--border-dk)}
 ::-webkit-scrollbar{width:4px;height:4px}
-::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border-dk);border-radius:2px}
 </style>
 </head>
 <body>
-
 <div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
-
 <div class="topbar">
   <div class="logo">
     <div class="logo-mark">DQ</div>
-    <div>
-      <div class="logo-name">DQF-M Scorer</div>
-      <div class="logo-sub">Documentation Quality Framework for Manufacturing &middot; Northeastern University 2026</div>
-    </div>
+    <div><div class="logo-name">DQF-M Scorer</div><div class="logo-sub">Documentation Quality Framework for Manufacturing &middot; Northeastern University 2026</div></div>
   </div>
   <div class="spacer"></div>
   <div class="tool-chip" id="toolChip"><div class="chip-dot"></div><span id="toolChipName"></span></div>
-  <div class="step-ind" id="stepInd"></div>
   <button class="btn-ghost" onclick="restart()">Start over</button>
 </div>
 
-<!-- ══ SCREEN 1: WELCOME ══ -->
-<div class="screen active" id="s-welcome">
+<!-- SCREEN 1: SMART ENTRY -->
+<div class="screen active" id="s-entry">
+<div class="entry-inner">
+  <div class="entry-eyebrow">Research Instrument &mdash; Raja Antony Mandal, MS DMC 2026</div>
+  <h1 class="entry-title">Evaluate any AI SOP tool against six manufacturing heuristics</h1>
+  <p class="entry-sub">Select a known tool for instant pre-filled scoring based on published research, or enter any tool and upload screenshots. Review and adjust, then get your results and recommendations in one click.</p>
 
-  <!-- Left: branding panel -->
-  <div class="w-left">
-    <div class="w-eyebrow">DQF-M Framework &mdash; 2026</div>
-    <h1 class="w-title">Evaluate AI documentation tools against six manufacturing heuristics</h1>
-    <p class="w-sub">A structured research instrument that scores any AI-powered SOP authoring tool across six evidence-based dimensions. Developed as part of a thesis at Northeastern University.</p>
-
-    <div class="w-heuristics">
-      <div class="w-h-row"><div class="w-h-code">H1</div><div class="w-h-info"><div class="w-h-name">Linguistic Remediation</div><div class="w-h-theory">Poka-Yoke · Plain Language · Flesch-Kincaid</div></div></div>
-      <div class="w-h-row"><div class="w-h-code">H2</div><div class="w-h-info"><div class="w-h-name">Knowledge Capture Efficiency</div><div class="w-h-theory">Tacit Knowledge · TAM · Cognitive Task Analysis</div></div></div>
-      <div class="w-h-row"><div class="w-h-code">H3</div><div class="w-h-info"><div class="w-h-name">Operational Continuity</div><div class="w-h-theory">Digital Thread · Industry 4.0 · ISO/IEC 25010</div></div></div>
-      <div class="w-h-row"><div class="w-h-code">H4</div><div class="w-h-info"><div class="w-h-name">Regulatory Defense by Default</div><div class="w-h-theory">Swiss Cheese Model · ISO 9001:2015 Clause 7.5</div></div></div>
-      <div class="w-h-row"><div class="w-h-code">H5</div><div class="w-h-info"><div class="w-h-name">Adoption Friction by Design</div><div class="w-h-theory">TAM · Diffusion of Innovations · Kotter</div></div></div>
-      <div class="w-h-row"><div class="w-h-code">H6</div><div class="w-h-info"><div class="w-h-name">IP Sovereignty</div><div class="w-h-theory">NIST CSF · ISO 27001 · Grant (1996)</div></div></div>
+  <div class="entry-card">
+    <div class="entry-card-title">Step 1 &mdash; Select or enter the tool being evaluated</div>
+    <div class="field">
+      <label>Known tools (click to pre-fill from research)</label>
+      <div class="known-tools" id="knownTools"></div>
     </div>
-
-    <div class="w-footer">
-      <div class="w-footer-text">Raja Antony Mandal &middot; MS Digital Media &amp; Communication &middot; Northeastern University 2026<br>Thesis: Evaluating AI-Powered SOP Authoring Tools in Manufacturing</div>
+    <div class="field">
+      <label>Or enter any tool name</label>
+      <input type="text" id="toolInput" placeholder="e.g. MasterControl, ETQ Reliance, Qualio..." oninput="onToolInput(this.value)">
+    </div>
+    <div class="autofill-notice" id="autofillNotice">
+      <span>&#10003;</span>
+      <span id="autofillMsg">Research data loaded — 30 criteria pre-filled from DQF-M study findings. Review and adjust below.</span>
     </div>
   </div>
 
-  <!-- Right: form panel -->
-  <div class="w-right">
-
-    <div class="w-section">
-      <div class="w-section-title">Your organization context</div>
-      <div class="w-section-sub">Shapes the recommendations at the end of the evaluation</div>
-      <div class="form-grid">
-        <div class="field"><label>Industry</label>
-          <select id="ctx-industry">
-            <option value="">Select industry</option>
-            <option>Automotive manufacturing</option><option>Aerospace &amp; defense</option>
-            <option>Medical device manufacturing</option><option>Electronics manufacturing</option>
-            <option>Food &amp; beverage manufacturing</option><option>Chemical manufacturing</option>
-            <option>General manufacturing</option><option>Other</option>
-          </select>
-        </div>
-        <div class="field"><label>Team size</label>
-          <select id="ctx-team">
-            <option value="">Select size</option>
-            <option>1&ndash;50 employees</option><option>51&ndash;250 employees</option>
-            <option>251&ndash;1,000 employees</option><option>1,001&ndash;5,000 employees</option>
-            <option>5,000+ employees</option>
-          </select>
-        </div>
-        <div class="field"><label>Current doc process</label>
-          <select id="ctx-current">
-            <option value="">Select process</option>
-            <option>Manual Word / Google Docs</option><option>Basic templates</option>
-            <option>Existing SOP software</option><option>Paper-based</option>
-            <option>No formal process</option>
-          </select>
-        </div>
-        <div class="field"><label>Primary compliance need</label>
-          <select id="ctx-compliance">
-            <option value="">Select standard</option>
-            <option>ISO 9001:2015</option><option>ISO 13485 (Medical)</option>
-            <option>AS9100 (Aerospace)</option><option>IATF 16949 (Automotive)</option>
-            <option>FDA 21 CFR Part 11</option><option>OSHA / Safety docs</option>
-            <option>Multiple standards</option><option>None specific</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-grid full">
-        <div class="field"><label>What problem are you trying to solve?</label>
-          <textarea id="ctx-problem" placeholder="e.g. Our SOPs take too long to update and operators use outdated versions on the shop floor..."></textarea>
-        </div>
-      </div>
+  <div class="entry-card">
+    <div class="entry-card-title">Step 2 &mdash; Upload screenshots <span style="font-weight:400;color:var(--muted)">(optional &mdash; up to 5)</span></div>
+    <div class="upload-zone" id="uploadZone" ondrop="handleDrop(event)" ondragover="e=>e.preventDefault()">
+      <input type="file" id="fileInput" multiple accept="image/*" onchange="handleFiles(this.files)">
+      <div class="upload-zone-icon">&#128247;</div>
+      <strong>Click to upload or drag &amp; drop</strong>
+      <p>UI screenshots, pricing page, DPA, settings &mdash; any visual evidence</p>
     </div>
-
-    <div class="w-section">
-      <div class="w-section-title">Tool being evaluated</div>
-      <div class="w-section-sub">Enter the tool name, then optionally upload screenshots to enable evidence-based scoring</div>
-      <div class="field" style="margin-bottom:12px">
-        <label>Tool name</label>
-        <input type="text" id="tool-name" placeholder="e.g. Dozuki, Poka.io, Tulip, Scribe, Trainual, MasterControl..." />
-      </div>
-      <div class="field">
-        <label>Upload screenshots <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--slate-lt)">&mdash; optional, up to 5 images</span></label>
-        <div class="upload-zone" id="uploadArea" onclick="document.getElementById('fileInput').click()" ondrop="handleDrop(event)" ondragover="handleDragOver(event)">
-          <span class="upload-icon">&#128247;</span>
-          <strong>Click to upload or drag &amp; drop</strong>
-          <p>PNG, JPG, GIF &mdash; UI screenshots, pricing pages, DPA, settings screens</p>
-        </div>
-        <input type="file" id="fileInput" multiple accept="image/*" style="display:none" onchange="handleFiles(this.files)">
-        <div class="preview-grid" id="previewGrid"></div>
-      </div>
-    </div>
-
-    <button class="cta-btn" id="startBtn" onclick="startEval()" disabled>Start evaluation &rarr;</button>
-
+    <div class="preview-grid" id="previewGrid"></div>
   </div>
+
+  <div class="entry-card">
+    <div class="entry-card-title">Step 3 &mdash; Your organization context <span style="font-weight:400;color:var(--muted)">(shapes recommendations)</span></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div class="field" style="margin-bottom:0">
+        <label>Industry</label>
+        <select id="ctx-industry">
+          <option value="">Select industry</option>
+          <option>Automotive manufacturing</option><option>Aerospace &amp; defense</option>
+          <option>Medical device manufacturing</option><option>Electronics manufacturing</option>
+          <option>Food &amp; beverage manufacturing</option><option>General manufacturing</option>
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>Compliance standard</label>
+        <select id="ctx-compliance">
+          <option value="">Select standard</option>
+          <option>ISO 9001:2015</option><option>ISO 13485 (Medical)</option>
+          <option>AS9100 (Aerospace)</option><option>IATF 16949 (Automotive)</option>
+          <option>FDA 21 CFR Part 11</option><option>Multiple standards</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <button class="cta-btn" id="ctaBtn" onclick="goToReview()" disabled>Review pre-filled scores &rarr;</button>
+</div>
 </div>
 
-<!-- ══ SCREEN 2: HEURISTIC PANELS ══ -->
-<div class="screen" id="s-heuristic">
-  <div class="h-left">
-    <div class="h-nav">
-      <div class="h-nav-title">Heuristics</div>
-      <div id="hNavItems"></div>
-    </div>
-    <div class="h-ss-panel">
-      <div class="h-ss-title">Uploaded screenshots</div>
-      <div id="screenshotNav"></div>
-    </div>
-  </div>
-  <div class="h-right">
-    <div class="h-content" id="hContent"></div>
-    <div class="h-footer">
-      <button class="btn-back" id="btnBack" onclick="prevH()">&#8592; Back</button>
-      <div class="footer-score">Score: <strong id="footerScore" style="color:var(--slate-lt)">—</strong> / 5</div>
-      <button class="btn-next" id="btnNext" onclick="nextH()">Next &rarr;</button>
-    </div>
-  </div>
-</div>
-
-<!-- ══ SCREEN 3: RESULTS ══ -->
-<div class="screen" id="s-results">
-  <div class="res-header">
+<!-- SCREEN 2: REVIEW -->
+<div class="screen" id="s-review">
+  <div class="review-header">
     <div>
-      <h2 id="resTitle">Evaluation complete</h2>
-      <div class="res-header-sub" id="resSub"></div>
+      <h2 id="reviewTitle">Review scores</h2>
+      <p id="reviewSubtitle">Adjust any criteria that don't match your evidence</p>
     </div>
     <div class="spacer"></div>
-    <div style="text-align:right">
-      <div class="res-total"><span id="totalScore">—</span><span class="res-denom"> / 30</span></div>
-      <div class="res-band" id="bandBadge"></div>
+    <div class="confidence-badge" id="confidenceBadge">&#10003; Research pre-filled</div>
+  </div>
+  <div class="review-body" id="reviewBody"></div>
+  <div class="review-footer">
+    <button class="btn-back-entry" onclick="goBack()">&#8592; Back</button>
+    <div class="review-summary">Estimated score: <strong id="estScore">—</strong> / 30</div>
+    <button class="btn-score" onclick="showResults()">Generate results &amp; recommendations &rarr;</button>
+  </div>
+</div>
+
+<!-- SCREEN 3: RESULTS -->
+<div class="screen" id="s-results">
+  <div class="results-topbar">
+    <div>
+      <h2 id="resultsTitle">Results</h2>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px" id="resultsCtx"></div>
+    </div>
+    <div class="spacer"></div>
+    <div>
+      <div class="results-total"><span id="totalScoreEl">—</span><span class="results-denom"> / 30</span></div>
+      <div class="band-pill" id="bandPill">—</div>
     </div>
   </div>
-  <div class="res-body" id="resBody"></div>
-  <div class="res-actions">
+  <div class="results-body" id="resultsBody"></div>
+  <div class="results-actions">
     <button class="btn-export" onclick="exportPDF()">
       <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="12" y2="18"/><line x1="15" y1="15" x2="12" y2="18"/></svg>
-      Export PDF report
+      Export PDF
     </button>
     <button class="btn-restart" onclick="restart()">New evaluation</button>
   </div>
 </div>
 
 <script>
-const H=[
-  {code:'H1',name:'Linguistic Remediation by Design',short:'Linguistic',theory:'Poka-Yoke (Shingo, 1986) · Plain Language Guidelines · Flesch-Kincaid',
-   question:'Does the tool enforce plain language outcomes automatically — making complexity structurally impossible rather than merely discouraged?',
+// ── HEURISTICS ───────────────────────────────────────────
+const H = [
+  {code:'H1',name:'Linguistic Remediation by Design',short:'Linguistic',
+   theory:'Poka-Yoke (Shingo, 1986) · Plain Language Guidelines · Flesch-Kincaid',
    criteria:[
-    {id:'h1c1',label:'Real-time readability grade display',desc:'Flesch-Kincaid or similar grade level shown as the author writes',weight:2},
-    {id:'h1c2',label:'Passive voice flagging',desc:'Tool identifies and flags passive constructions before finalization',weight:2},
-    {id:'h1c3',label:'Hard stop before publication',desc:'Document cannot be published if readability threshold is not met',weight:3},
-    {id:'h1c4',label:'Jargon and acronym detection',desc:'Tool alerts author to undefined jargon or unexplained acronyms',weight:2},
-    {id:'h1c5',label:'Author cannot disable enforcement',desc:'Plain language controls cannot be switched off by the document author',weight:1},
+    {id:'h1c1',label:'Real-time readability grade display',weight:2,key:'grade'},
+    {id:'h1c2',label:'Passive voice flagging',weight:2,key:'passive'},
+    {id:'h1c3',label:'Hard stop before publication',weight:3,key:'hardstop'},
+    {id:'h1c4',label:'Jargon and acronym detection',weight:2,key:'jargon'},
+    {id:'h1c5',label:'Author cannot disable enforcement',weight:1,key:'nodisable'},
    ],
-   verdicts:{5:'Architecturally enforced — complexity structurally impossible',4:'Strong real-time enforcement — most issues caught',3:'Advisory feedback — depends on author discipline',2:'Post-authoring detection only',1:'No readability features'},
-   recs:{5:'',4:'',3:'Escalate from advisory to hard-stop: grade compliance should block publication, not just warn.',2:'Implement real-time readability feedback during authoring — post-completion reports arrive too late.',1:'Introduce minimum Flesch-Kincaid Grade 7–8 enforcement as a hard publishing requirement.'}},
-  {code:'H2',name:'Knowledge Capture Efficiency',short:'Knowledge Capture',theory:'Tacit Knowledge Externalization (Nonaka & Takeuchi, 1995) · TAM (Davis, 1989)',
-   question:'Can a subject matter expert who is not a writer produce a complete compliant SOP draft using the tool as the primary capture mechanism?',
+   verdicts:{5:'Architecturally enforced — complexity structurally impossible',4:'Strong real-time enforcement',3:'Advisory feedback present but ignorable',2:'Post-authoring detection only',1:'No readability features'},
+   recs:{5:'',4:'',3:'Escalate from advisory to hard stop: grade compliance should block publication.',2:'Implement real-time feedback during authoring, not only at completion.',1:'Introduce minimum Flesch-Kincaid Grade 7–8 enforcement as a publishing requirement.'}},
+  {code:'H2',name:'Knowledge Capture Efficiency',short:'Knowledge Capture',
+   theory:'Nonaka & Takeuchi (1995) · TAM (Davis, 1989) · Cognitive Task Analysis',
    criteria:[
-    {id:'h2c1',label:'Video input to structured steps',desc:'Expert records process; tool converts video into step-by-step SOP draft',weight:3},
-    {id:'h2c2',label:'Voice / audio transcription',desc:'Spoken description captured and structured into document format',weight:2},
-    {id:'h2c3',label:'Photo annotation to steps',desc:'Images annotated and converted to documented procedures',weight:2},
-    {id:'h2c4',label:'Guided prompts elicit tacit knowledge',desc:'System asks targeted follow-up questions to surface unstated expertise',weight:2},
-    {id:'h2c5',label:'Draft produced in under 30 minutes',desc:'Non-writer SME can produce a reviewable draft within 30 minutes',weight:1},
+    {id:'h2c1',label:'Video input to structured steps',weight:3,key:'video'},
+    {id:'h2c2',label:'Voice / audio transcription',weight:2,key:'voice'},
+    {id:'h2c3',label:'Photo annotation to steps',weight:2,key:'photo'},
+    {id:'h2c4',label:'Guided prompts elicit tacit knowledge',weight:2,key:'prompts'},
+    {id:'h2c5',label:'SME draft ready in under 30 minutes',weight:1,key:'speed'},
    ],
-   verdicts:{5:'Full tacit externalization — expert demonstrates, tool writes the SOP',4:'Strong multimodal capture — writing reduced to review',3:'Guided prompts reduce burden but writing still required',2:'Templates available but expert must author all content',1:'Writing skill required simultaneously with subject matter expertise'},
-   recs:{5:'',4:'',3:'Add video or voice capture to eliminate written input entirely for shop floor SMEs.',2:'Introduce guided prompts that ask targeted questions rather than presenting blank template fields.',1:'Redesign capture around multimodal input. Requiring writing from machinists creates a fundamental knowledge transfer barrier.'}},
-  {code:'H3',name:'Operational Continuity',short:'Op. Continuity',theory:'Zdravkovic et al. (2022) Enterprise IS · Industry 4.0 Digital Thread · ISO/IEC 25010',
-   question:'Does the tool maintain document integrity across the full lifecycle — from authoring through approval to shop floor deployment — with zero manual handoffs?',
+   verdicts:{5:'Full externalization — expert demonstrates, tool writes',4:'Strong multimodal capture',3:'Guided prompts reduce burden but writing still required',2:'Templates only — all content authored by expert',1:'Writing expertise required simultaneously with subject expertise'},
+   recs:{5:'',4:'',3:'Add video or voice capture to eliminate written input for shop floor SMEs.',2:'Introduce guided prompts rather than blank template fields.',1:'Redesign capture workflow around multimodal input.'}},
+  {code:'H3',name:'Operational Continuity',short:'Op. Continuity',
+   theory:'Zdravkovic et al. (2022) · Industry 4.0 Digital Thread · ISO/IEC 25010',
    criteria:[
-    {id:'h3c1',label:'Native QMS integration',desc:'Changes sync automatically to Quality Management System without manual export',weight:3},
-    {id:'h3c2',label:'Native LMS integration',desc:'Training records update automatically when document is revised',weight:2},
-    {id:'h3c3',label:'Shop floor display without manual push',desc:'Approved documents appear on shop floor screens automatically',weight:3},
-    {id:'h3c4',label:'Version auto-supersession',desc:'Previous versions automatically archived and removed from active use on new approval',weight:2},
-    {id:'h3c5',label:'Audit trail without manual logging',desc:'All view, edit, and approval events logged automatically',weight:2},
+    {id:'h3c1',label:'Native QMS integration',weight:3,key:'qms'},
+    {id:'h3c2',label:'Native LMS integration',weight:2,key:'lms'},
+    {id:'h3c3',label:'Shop floor display without manual push',weight:3,key:'shopfloor'},
+    {id:'h3c4',label:'Version auto-supersession',weight:2,key:'supersede'},
+    {id:'h3c5',label:'Complete audit trail without manual logging',weight:2,key:'audit'},
    ],
-   verdicts:{5:'Unbroken digital thread — zero manual handoffs end-to-end',4:'Mostly automated — one optional manual step remains',3:'Partial automation — digital thread broken at one or more points',2:'Export-dependent — all distribution manual after creation',1:'Manual island — isolated from all operational systems'},
-   recs:{5:'',4:'Audit the remaining manual step and evaluate whether it can be automated in the next contract cycle.',3:'Map the specific broken points in the digital thread and prioritize the highest-risk handoff for automation first.',2:'Start by building one native integration. The QMS connection eliminates the highest version-risk handoff.',1:'Without operational integrations this is a document editor, not a documentation system.'}},
-  {code:'H4',name:'Regulatory Defense by Default',short:'Regulatory',theory:"Reason's Swiss Cheese Model (1990) · Fail-Safe Design (Petroski, 1992) · ISO 9001:2015 Clause 7.5",
-   question:'Is non-compliance structurally impossible — can a user publish a document that would fail an ISO 9001 Clause 7.5 audit, or does the system prevent this by design?',
+   verdicts:{5:'Unbroken digital thread — zero manual handoffs',4:'Mostly automated — one optional manual step',3:'Partial automation — thread broken at one or more points',2:'Export-dependent — all distribution manual',1:'Manual island — tool operates in isolation'},
+   recs:{5:'',4:'',3:'Map the broken points and automate the highest-risk handoff first — typically QMS or shop floor.',2:'Build one native integration to eliminate the first manual handoff.',1:'Without operational integrations this is a document editor, not a documentation system.'}},
+  {code:'H4',name:'Regulatory Defense by Default',short:'Regulatory',
+   theory:"Reason's Swiss Cheese Model (1990) · ISO 9001:2015 Clause 7.5",
    criteria:[
-    {id:'h4c1',label:'Version number system-generated and mandatory',desc:'Every document receives an auto-incremented version number that cannot be removed',weight:3},
-    {id:'h4c2',label:'Approval workflow mandatory before publication',desc:'Document cannot be published without completing the defined approval chain',weight:3},
-    {id:'h4c3',label:'Revision date auto-stamped',desc:'System automatically records the revision date — author cannot manually alter',weight:2},
-    {id:'h4c4',label:'Superseded versions automatically archived',desc:'Previous versions locked and removed from active circulation on new publication',weight:2},
-    {id:'h4c5',label:'Non-compliant publication blocked, not warned',desc:'Document missing required fields cannot be submitted — system physically prevents it',weight:3},
+    {id:'h4c1',label:'Version number system-generated and mandatory',weight:3,key:'version'},
+    {id:'h4c2',label:'Approval workflow mandatory before publication',weight:3,key:'approval'},
+    {id:'h4c3',label:'Revision date auto-stamped',weight:2,key:'revdate'},
+    {id:'h4c4',label:'Superseded versions automatically archived',weight:2,key:'archive'},
+    {id:'h4c5',label:'Non-compliant publication blocked, not warned',weight:3,key:'block'},
    ],
-   verdicts:{5:'Non-compliance structurally impossible — all ISO 9001 Clause 7.5 fields enforced at system level',4:'Critical fields mandatory — minor elements may still be optional',3:'Warnings present but dismissible — compliance depends on user discipline',2:'Soft prompts only — motivated user can bypass all controls',1:'No compliance architecture — any document publishable in any state'},
-   recs:{5:'',4:'Audit the remaining optional elements against your specific standard.',3:'Convert dismissible warnings to hard stops for version number, approval signature, and revision date.',2:'Rebuild the publication workflow with mandatory fields. Advisory-only compliance is no compliance in a manufacturing audit.',1:'This tool cannot be used in an ISO 9001 or regulated environment without complete workflow redesign.'}},
-  {code:'H5',name:'Adoption Friction by Design',short:'Adoption Friction',theory:'TAM (Davis, 1989) · Diffusion of Innovations (Rogers, 2003) · Kotter (1996)',
-   question:'Can any manufacturing employee — machinist, process engineer, QA technician — adopt this tool on day one without vendor onboarding, a technical writer intermediary, or hidden costs?',
+   verdicts:{5:'Non-compliance structurally impossible',4:'Critical fields mandatory — minor elements optional',3:'Warnings present but dismissible',2:'Soft prompts — all fields effectively optional',1:'No compliance architecture'},
+   recs:{5:'',4:'Audit remaining optional elements against your compliance standard.',3:'Convert dismissible warnings to hard stops for version, approval, and revision date.',2:'Rebuild the publication workflow with mandatory fields.',1:'This tool cannot be used in a regulated manufacturing environment without complete workflow redesign.'}},
+  {code:'H5',name:'Adoption Friction by Design',short:'Adoption Friction',
+   theory:'TAM (Davis, 1989) · Diffusion of Innovations (Rogers, 2003) · Kotter (1996)',
    criteria:[
-    {id:'h5c1',label:'Pricing published before contract',desc:'Full cost including implementation, training, and year-3 maintenance visible before signing',weight:2},
-    {id:'h5c2',label:'Self-service onboarding under 2 hours',desc:'Non-technical employee produces first document without a vendor call or a writer',weight:3},
-    {id:'h5c3',label:'Manufacturing-specific templates included',desc:'SOP, LOTO, work instruction, and safety procedure templates available out of the box',weight:2},
-    {id:'h5c4',label:'No vendor professional services required',desc:'Customization, integration setup, and training are self-service — not billable add-ons',weight:2},
-    {id:'h5c5',label:'UI language requires no writing background',desc:'Navigation and prompts designed for shop floor roles, not documentation professionals',weight:3},
+    {id:'h5c1',label:'Pricing published before contract',weight:2,key:'pricing'},
+    {id:'h5c2',label:'Self-service onboarding under 2 hours',weight:3,key:'onboard'},
+    {id:'h5c3',label:'Manufacturing-specific templates included',weight:2,key:'templates'},
+    {id:'h5c4',label:'No vendor professional services required',weight:2,key:'novendor'},
+    {id:'h5c5',label:'UI language requires no writing background',weight:3,key:'uilang'},
    ],
-   verdicts:{5:'Frictionless by design — any manufacturing employee productive on day one',4:'Low friction — transparent pricing, short onboarding, self-service deployment',3:'Guided adoption — self-deployment possible with significant time investment',2:'Moderate friction — intermediary needed and some costs hidden',1:'High friction — vendor-dependent, opaque pricing, UI requires documentation expertise'},
-   recs:{5:'',4:'',3:'Reduce role-specific onboarding to under 2 hours and publish complete cost of ownership before contract signature.',2:'Create onboarding paths specifically for non-technical roles. Generic onboarding assumes writing expertise shop floor employees do not have.',1:'This tool was designed for documentation professionals. Without significant UX redesign it will stall at procurement.'}},
-  {code:'H6',name:'Intellectual Property Sovereignty',short:'IP Sovereignty',theory:'NIST Cybersecurity Framework (2014) · ISO 27001 · Grant (1996) Proprietary Knowledge',
-   question:'Does the organization retain complete, legally enforceable, and verifiably audited control over its process knowledge — with no vendor data rights and no AI training exposure?',
+   verdicts:{5:'Frictionless — any employee produces a compliant doc on day one',4:'Low friction — transparent pricing, short onboarding',3:'Guided adoption — self-deployment possible with significant effort',2:'Moderate friction — non-technical authors need an intermediary',1:'High friction — vendor-dependent, opaque pricing, UI assumes expertise'},
+   recs:{5:'',4:'',3:'Reduce role-specific onboarding to under 2 hours and publish full cost of ownership.',2:'Create onboarding paths specifically for non-technical manufacturing roles.',1:'This tool was designed for documentation professionals, not manufacturing employees.'}},
+  {code:'H6',name:'Intellectual Property Sovereignty',short:'IP Sovereignty',
+   theory:'NIST CSF (2014) · ISO 27001 · Grant (1996) Proprietary Knowledge',
    criteria:[
-    {id:'h6c1',label:'Tamper-proof version date stamps',desc:'System-generated timestamps that neither vendor nor customer can alter retroactively',weight:2},
-    {id:'h6c2',label:'Complete user access audit log',desc:'Every view, edit, approval, and export action recorded with user identity and timestamp',weight:3},
-    {id:'h6c3',label:'Explicit AI training prohibition in DPA',desc:'Data Processing Agreement explicitly states vendor cannot use content to train AI models',weight:3},
-    {id:'h6c4',label:'Independent compliance certification',desc:'Vendor holds SOC 2 Type II or ISO 27001 — independently audited, not self-assessed',weight:2},
-    {id:'h6c5',label:'Data deletion on termination guaranteed in writing',desc:'Contract specifies complete deletion within defined period with written confirmation',weight:2},
+    {id:'h6c1',label:'Tamper-proof version date stamps',weight:2,key:'stamps'},
+    {id:'h6c2',label:'Complete user access audit log',weight:3,key:'accesslog'},
+    {id:'h6c3',label:'Explicit AI training prohibition in DPA',weight:3,key:'aiprohibit'},
+    {id:'h6c4',label:'SOC 2 Type II or ISO 27001 certified',weight:2,key:'cert'},
+    {id:'h6c5',label:'Data deletion on termination guaranteed',weight:2,key:'deletion'},
    ],
-   verdicts:{5:'Full sovereignty — tamper-proof trail, AI training prohibition, independent certification, guaranteed deletion',4:'Contractual ownership confirmed with certified compliance',3:'Ownership claimed in policy — unverified by independent audit',2:'Ambiguous ownership — vendor data rights present through exceptions or silence',1:'No IP protection — vendor data rights active, no audit trail, no compliance certification'},
-   recs:{5:'',4:'',3:'Request SOC 2 Type II or ISO 27001 certification. Policy statements are not auditable.',2:'Do not sign a contract with ambiguous data ownership. Require explicit DPA with AI training prohibition before signature.',1:'This vendor poses an active IP risk. Do not use for any process you consider competitively sensitive.'}}
+   verdicts:{5:'Full sovereignty — tamper-proof trail, AI prohibition, certified, guaranteed deletion',4:'Contractual ownership confirmed with certified compliance',3:'Ownership claimed in policy — unverified by independent audit',2:'Ambiguous ownership — vendor data rights present through exceptions',1:'No IP protection — vendor data rights active'},
+   recs:{5:'',4:'',3:'Require SOC 2 Type II or ISO 27001 certification. Policy statements are not auditable.',2:'Do not sign without explicit DPA with AI training prohibition.',1:'This vendor poses an active IP risk. Do not use for any process you consider competitively sensitive.'}}
 ];
 
 const BANDS=[
@@ -488,253 +344,429 @@ const BANDS=[
 ];
 const SC={5:'#1A7A4A',4:'#2E9E68',3:'#B45309',2:'#C0392B',1:'#8B0000'};
 
-let state={tool:'',context:{},screenshots:[],currentH:0,criteria:{},notes:{},scores:{}};
-let radarChart=null,selectedSS=null;
-H.forEach(h=>{state.criteria[h.code]={};h.criteria.forEach(c=>state.criteria[h.code][c.id]=null);state.notes[h.code]='';});
+// ── KNOWN TOOL DATABASE (from DQF-M research) ────────────────
+const KNOWN_TOOLS={
+  'Dozuki':{
+    score:20,confidence:'Research data',
+    criteria:{h1c1:'absent',h1c2:'partial',h1c3:'absent',h1c4:'absent',h1c5:'absent',
+              h2c1:'confirmed',h2c2:'partial',h2c3:'confirmed',h2c4:'confirmed',h2c5:'confirmed',
+              h3c1:'partial',h3c2:'absent',h3c3:'absent',h3c4:'confirmed',h3c5:'confirmed',
+              h4c1:'confirmed',h4c2:'confirmed',h4c3:'confirmed',h4c4:'confirmed',h4c5:'confirmed',
+              h5c1:'absent',h5c2:'absent',h5c3:'partial',h5c4:'absent',h5c5:'partial',
+              h6c1:'confirmed',h6c2:'confirmed',h6c3:'absent',h6c4:'absent',h6c5:'partial'}
+  },
+  'Poka.io':{
+    score:19,confidence:'Research data',
+    criteria:{h1c1:'absent',h1c2:'absent',h1c3:'absent',h1c4:'absent',h1c5:'absent',
+              h2c1:'confirmed',h2c2:'confirmed',h2c3:'confirmed',h2c4:'confirmed',h2c5:'confirmed',
+              h3c1:'confirmed',h3c2:'partial',h3c3:'confirmed',h3c4:'confirmed',h3c5:'confirmed',
+              h4c1:'confirmed',h4c2:'confirmed',h4c3:'confirmed',h4c4:'partial',h4c5:'partial',
+              h5c1:'absent',h5c2:'partial',h5c3:'confirmed',h5c4:'partial',h5c5:'confirmed',
+              h6c1:'partial',h6c2:'absent',h6c3:'absent',h6c4:'absent',h6c5:'partial'}
+  },
+  'Tulip':{
+    score:17,confidence:'Research data',
+    criteria:{h1c1:'absent',h1c2:'absent',h1c3:'absent',h1c4:'absent',h1c5:'absent',
+              h2c1:'confirmed',h2c2:'partial',h2c3:'confirmed',h2c4:'partial',h2c5:'partial',
+              h3c1:'confirmed',h3c2:'partial',h3c3:'confirmed',h3c4:'confirmed',h3c5:'confirmed',
+              h4c1:'partial',h4c2:'partial',h4c3:'partial',h4c4:'partial',h4c5:'absent',
+              h5c1:'absent',h5c2:'absent',h5c3:'partial',h5c4:'absent',h5c5:'partial',
+              h6c1:'partial',h6c2:'absent',h6c3:'absent',h6c4:'absent',h6c5:'partial'}
+  },
+  'Scribe':{
+    score:13,confidence:'Research data',
+    criteria:{h1c1:'absent',h1c2:'absent',h1c3:'absent',h1c4:'absent',h1c5:'absent',
+              h2c1:'absent',h2c2:'absent',h2c3:'confirmed',h2c4:'partial',h2c5:'confirmed',
+              h3c1:'absent',h3c2:'absent',h3c3:'absent',h3c4:'absent',h3c5:'partial',
+              h4c1:'absent',h4c2:'absent',h4c3:'absent',h4c4:'absent',h4c5:'absent',
+              h5c1:'confirmed',h5c2:'confirmed',h5c3:'absent',h5c4:'confirmed',h5c5:'confirmed',
+              h6c1:'partial',h6c2:'partial',h6c3:'absent',h6c4:'partial',h6c5:'partial'}
+  },
+  'Trainual':{
+    score:14,confidence:'Research data',
+    criteria:{h1c1:'absent',h1c2:'absent',h1c3:'absent',h1c4:'absent',h1c5:'absent',
+              h2c1:'absent',h2c2:'absent',h2c3:'absent',h2c4:'confirmed',h2c5:'partial',
+              h3c1:'absent',h3c2:'partial',h3c3:'absent',h3c4:'partial',h3c5:'partial',
+              h4c1:'partial',h4c2:'partial',h4c3:'partial',h4c4:'absent',h4c5:'absent',
+              h5c1:'confirmed',h5c2:'confirmed',h5c3:'absent',h5c4:'confirmed',h5c5:'confirmed',
+              h6c1:'partial',h6c2:'absent',h6c3:'absent',h6c4:'absent',h6c5:'partial'}
+  }
+};
 
-const getBand=t=>BANDS.find(b=>t>=b.min)||BANDS[BANDS.length-1];
-const sc=s=>SC[s]||'#CBD1D8';
+// ── STATE ─────────────────────────────────────────────────────
+let state={
+  tool:'',context:{},screenshots:[],
+  criteria:{},source:{},
+  knownMatch:null
+};
+let radarChart=null;
 
-function computeScore(hCode){
-  const h=H.find(x=>x.code===hCode);const crit=state.criteria[hCode];
+H.forEach(h=>{
+  state.criteria[h.code]={};
+  state.source[h.code]={};
+  h.criteria.forEach(c=>{
+    state.criteria[h.code][c.id]=null;
+    state.source[h.code][c.id]='default';
+  });
+});
+
+function getBand(t){return BANDS.find(b=>t>=b.min)||BANDS[BANDS.length-1]}
+function sc(s){return SC[s]||'#CBD1D8'}
+
+function computeHScore(hCode){
+  const h=H.find(x=>x.code===hCode),crit=state.criteria[hCode];
   let tw=0,ew=0;
-  h.criteria.forEach(c=>{tw+=c.weight;const v=crit[c.id];if(v==='confirmed')ew+=c.weight;else if(v==='partial')ew+=c.weight*0.5;});
+  h.criteria.forEach(c=>{
+    tw+=c.weight;
+    const v=crit[c.id];
+    if(v==='confirmed')ew+=c.weight;
+    else if(v==='partial')ew+=c.weight*0.5;
+  });
   const answered=Object.values(crit).filter(v=>v!==null).length;
   if(!answered)return null;
   const r=ew/tw;
-  return r>=0.90?5:r>=0.70?4:r>=0.45?3:r>=0.20?2:1;
+  if(r>=.90)return 5;if(r>=.70)return 4;if(r>=.45)return 3;if(r>=.20)return 2;return 1;
 }
-function allAnswered(hCode){const h=H.find(x=>x.code===hCode);return h.criteria.every(c=>state.criteria[hCode][c.id]!==null);}
 
-// Screenshots
+function getEstTotal(){
+  return H.reduce((sum,h)=>{const s=computeHScore(h.code);return sum+(s||0)},0);
+}
+
+// ── KNOWN TOOLS CHIPS ─────────────────────────────────────────
+function renderKnownChips(){
+  const el=document.getElementById('knownTools');
+  el.innerHTML=Object.keys(KNOWN_TOOLS).map(name=>`
+    <div class="known-chip" id="chip-${name}" onclick="selectKnown('${name}')">
+      ${name} <span class="chip-score">${KNOWN_TOOLS[name].score}/30</span>
+    </div>`).join('');
+}
+
+function selectKnown(name){
+  document.querySelectorAll('.known-chip').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('chip-'+name).classList.add('selected');
+  document.getElementById('toolInput').value=name;
+  state.tool=name;
+  state.knownMatch=name;
+  const data=KNOWN_TOOLS[name];
+  H.forEach(h=>{
+    h.criteria.forEach(c=>{
+      state.criteria[h.code][c.id]=data.criteria[c.id]||'absent';
+      state.source[h.code][c.id]='research';
+    });
+  });
+  document.getElementById('autofillMsg').textContent=`Research data loaded for ${name} — all 30 criteria pre-filled from DQF-M study findings. Review and adjust below.`;
+  document.getElementById('autofillNotice').classList.add('show');
+  document.getElementById('ctaBtn').disabled=false;
+  updateToolChip(name);
+}
+
+function onToolInput(val){
+  state.tool=val.trim();
+  document.querySelectorAll('.known-chip').forEach(c=>c.classList.remove('selected'));
+  state.knownMatch=null;
+  document.getElementById('autofillNotice').classList.remove('show');
+  if(!state.tool){document.getElementById('ctaBtn').disabled=true;return}
+  // Check for partial match
+  const match=Object.keys(KNOWN_TOOLS).find(k=>k.toLowerCase()===state.tool.toLowerCase());
+  if(match){selectKnown(match);return}
+  // Unknown tool — set all criteria to partial as intelligent default
+  H.forEach(h=>{
+    h.criteria.forEach(c=>{
+      state.criteria[h.code][c.id]='partial';
+      state.source[h.code][c.id]='default';
+    });
+  });
+  document.getElementById('ctaBtn').disabled=false;
+  updateToolChip(state.tool);
+}
+
+function updateToolChip(name){
+  document.getElementById('toolChipName').textContent=name;
+  document.getElementById('toolChip').classList.add('show');
+}
+
+// ── SCREENSHOTS ───────────────────────────────────────────────
 function handleFiles(files){
   Array.from(files).slice(0,5-state.screenshots.length).forEach(f=>{
     if(!f.type.startsWith('image/'))return;
-    const r=new FileReader();r.onload=e=>{state.screenshots.push({name:f.name,dataUrl:e.target.result});renderPreviews();renderSSNav();};r.readAsDataURL(f);
+    const reader=new FileReader();
+    reader.onload=e=>{
+      state.screenshots.push({name:f.name,dataUrl:e.target.result});
+      renderPreviews();
+      // Upgrade source badges for screenshot evidence
+      if(state.screenshots.length>0){
+        const notice=document.getElementById('autofillNotice');
+        if(notice.classList.contains('show')){
+          document.getElementById('autofillMsg').textContent=
+            `${state.tool} research data loaded + ${state.screenshots.length} screenshot(s) uploaded as evidence. Review scores below.`;
+        }
+      }
+    };
+    reader.readAsDataURL(f);
   });
 }
-function handleDrop(e){e.preventDefault();handleFiles(e.dataTransfer.files);}
-function handleDragOver(e){e.preventDefault();}
+function handleDrop(e){e.preventDefault();handleFiles(e.dataTransfer.files)}
+
 function renderPreviews(){
-  document.getElementById('previewGrid').innerHTML=state.screenshots.map((s,i)=>`<div class="preview-thumb"><img src="${s.dataUrl}"><button onclick="removeScreenshot(${i})">&#215;</button></div>`).join('');
+  document.getElementById('previewGrid').innerHTML=state.screenshots.map((s,i)=>`
+    <div class="preview-thumb">
+      <img src="${s.dataUrl}" alt="${s.name}">
+      <button class="remove-btn" onclick="removeScreenshot(${i})">&#215;</button>
+    </div>`).join('');
 }
-function removeScreenshot(i){state.screenshots.splice(i,1);renderPreviews();renderSSNav();}
+function removeScreenshot(i){state.screenshots.splice(i,1);renderPreviews()}
 
-// Welcome
-document.getElementById('tool-name').addEventListener('input',function(){document.getElementById('startBtn').disabled=!this.value.trim();});
-
-function startEval(){
-  state.tool=document.getElementById('tool-name').value.trim();
-  state.context={industry:document.getElementById('ctx-industry').value,team:document.getElementById('ctx-team').value,current:document.getElementById('ctx-current').value,compliance:document.getElementById('ctx-compliance').value,problem:document.getElementById('ctx-problem').value.trim()};
-  document.getElementById('toolChipName').textContent=state.tool;
-  document.getElementById('toolChip').classList.add('show');
-  showScreen('s-heuristic');
-  renderHNav();renderSSNav();loadH(0);updateProg();
+// ── REVIEW SCREEN ─────────────────────────────────────────────
+function goToReview(){
+  state.context={
+    industry:document.getElementById('ctx-industry').value,
+    compliance:document.getElementById('ctx-compliance').value
+  };
+  document.getElementById('reviewTitle').textContent=`Review scores — ${state.tool}`;
+  document.getElementById('reviewSubtitle').textContent=
+    state.knownMatch
+      ? 'Pre-filled from DQF-M research. Adjust any criteria that don\'t match your evidence.'
+      : 'Default scores applied. Toggle each criterion based on what you observe in the tool.';
+  const badge=document.getElementById('confidenceBadge');
+  badge.textContent=state.knownMatch?'✓ Research pre-filled':'○ Default — please review';
+  badge.style.background=state.knownMatch?'var(--green-lt)':'var(--amber-lt)';
+  badge.style.color=state.knownMatch?'var(--green)':'var(--amber)';
+  renderReviewCards();
+  showScreen('s-review');
+  document.getElementById('progFill').style.width='55%';
 }
 
-function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
-
-function updateProg(){
-  const done=H.filter(h=>allAnswered(h.code)).length;
-  const pct=state.currentH===H.length?100:Math.round((state.currentH/H.length)*90+(done/H.length)*10);
-  document.getElementById('progFill').style.width=Math.min(100,pct+5)+'%';
-  document.getElementById('stepInd').textContent=(state.currentH+1)+' of '+H.length;
-}
-
-function renderHNav(){
-  document.getElementById('hNavItems').innerHTML=H.map((h,i)=>{
-    const s=state.scores[h.code],col=s?sc(s):'#CBD1D8',pct=s?s/5*100:0,done=allAnswered(h.code);
-    return`<div class="h-nav-item ${i===state.currentH?'active':''} ${done?'done':''}" onclick="loadH(${i})">
-      <div class="h-nav-code">${h.code}</div>
-      <div class="h-nav-info">
-        <div class="h-nav-name">${h.short}</div>
-        <div class="h-nav-score">${s?s+'/5':'Not scored'}</div>
-        <div class="h-nav-bar"><div class="h-nav-bar-fill" style="width:${pct}%;background:${col}"></div></div>
+function renderReviewCards(){
+  document.getElementById('reviewBody').innerHTML=H.map(h=>{
+    const score=computeHScore(h.code);
+    const col=score?sc(score):'#CBD1D8';
+    const pct=score?score/5*100:0;
+    return`<div class="review-hcard">
+      <div class="hcard-header">
+        <div class="hcard-code">${h.code}</div>
+        <div class="hcard-info">
+          <div class="hcard-name">${h.name}</div>
+          <div class="hcard-theory">${h.theory}</div>
+        </div>
+        <div class="hcard-score-wrap">
+          <div class="hcard-score" style="color:${col}">${score||'—'}</div>
+          <div>
+            <div class="hcard-score-bar"><div class="hcard-score-fill" style="width:${pct}%;background:${col}"></div></div>
+            <div style="font-size:9px;color:var(--muted);margin-top:2px;text-align:right">/ 5</div>
+          </div>
+        </div>
+      </div>
+      <div class="hcard-body">
+        ${h.criteria.map(c=>{
+          const val=state.criteria[h.code][c.id];
+          const src=state.source[h.code][c.id];
+          const srcLabel=src==='research'?'Research':src==='screenshot'?'Screenshot':'';
+          const wc=c.weight>=3?'#C0784A':c.weight===2?'#9CA3AF':'#CBD1D8';
+          return`<div class="criterion-row">
+            <div class="criterion-weight-dot" style="background:${wc}"></div>
+            <div class="criterion-text">${c.label}${srcLabel?`<span class="source-badge source-${src}" style="margin-left:6px">${srcLabel}</span>`:''}</div>
+            <div class="mini-toggles">
+              <button class="mini-btn ${val==='confirmed'?'confirmed':''}" onclick="setCrit('${h.code}','${c.id}','confirmed',this)">&#10003;</button>
+              <button class="mini-btn ${val==='partial'?'partial':''}" onclick="setCrit('${h.code}','${c.id}','partial',this)">&#126;</button>
+              <button class="mini-btn ${val==='absent'?'absent':''}" onclick="setCrit('${h.code}','${c.id}','absent',this)">&#10007;</button>
+            </div>
+          </div>`;
+        }).join('')}
       </div>
     </div>`;
   }).join('');
+  updateEstScore();
 }
 
-function renderSSNav(){
-  const el=document.getElementById('screenshotNav');
-  if(!state.screenshots.length){el.innerHTML='<div class="no-ss">No screenshots uploaded</div>';return;}
-  el.innerHTML=`<div class="ss-thumbs">${state.screenshots.map((s,i)=>`<div class="ss-thumb ${selectedSS===i?'sel':''}" onclick="selectSS(${i})" id="ssthumb${i}"><img src="${s.dataUrl}"></div>`).join('')}</div>`;
+function setCrit(hCode,cId,val,btn){
+  const cur=state.criteria[hCode][cId];
+  state.criteria[hCode][cId]=cur===val?null:val;
+  state.source[hCode][cId]='manual';
+  renderReviewCards();
 }
 
-function selectSS(i){selectedSS=i;renderSSNav();loadH(state.currentH,true);}
+function updateEstScore(){
+  const t=getEstTotal();
+  document.getElementById('estScore').textContent=t||'—';
+  const el=document.getElementById('estScore');
+  if(t){const b=getBand(t);el.style.color=b.color;}
+}
 
-function loadH(idx,keepScroll){
-  state.currentH=idx;const h=H[idx];const crit=state.criteria[h.code];
-  const score=computeScore(h.code);state.scores[h.code]=score;
-  const col=score?sc(score):'#CBD1D8';
-  const barW=score?score/5*100:0;
-  const verdict=score?h.verdicts[score]:'Answer the criteria below to generate a score';
+// ── RESULTS ───────────────────────────────────────────────────
+function showResults(){
+  H.forEach(h=>{const s=computeHScore(h.code);if(s){}});
+  const total=getEstTotal();
+  const band=getBand(total);
+
+  document.getElementById('totalScoreEl').textContent=total;
+  document.getElementById('resultsTitle').textContent=`${state.tool} — DQF-M Evaluation`;
+  const ctxParts=[state.context.industry,state.context.compliance].filter(Boolean);
+  document.getElementById('resultsCtx').textContent=ctxParts.join(' · ')||'DQF-M Framework Evaluation';
+  const pill=document.getElementById('bandPill');
+  pill.textContent=band.label;pill.style.background=band.bg;pill.style.color=band.color;
+
+  const low=H.filter(h=>computeHScore(h.code)<=2);
+  const mid=H.filter(h=>computeHScore(h.code)===3);
+  const high=H.filter(h=>computeHScore(h.code)>=4);
+
+  let recs='';
+  if(low.length)recs+=low.map(h=>`<div class="rec-item gap"><span class="rec-label">Priority gap — ${h.code} ${h.short} (${computeHScore(h.code)}/5)</span>${h.recs[computeHScore(h.code)]||''}</div>`).join('');
+  if(mid.length)recs+=mid.map(h=>`<div class="rec-item config"><span class="rec-label">Needs configuration — ${h.code} ${h.short} (${computeHScore(h.code)}/5)</span>${h.recs[computeHScore(h.code)]||''}</div>`).join('');
+  if(high.length)recs+=high.map(h=>`<div class="rec-item strength"><span class="rec-label">Strength — ${h.code} ${h.short} (${computeHScore(h.code)}/5)</span>${h.verdicts[computeHScore(h.code)]||''}</div>`).join('');
+  if(!recs)recs='<div class="rec-item strength"><span class="rec-label">Excellent</span>This tool meets enterprise documentation quality standards across all six heuristics.</div>';
 
   let evidenceHtml='';
-  if(selectedSS!==null&&state.screenshots[selectedSS]){
-    const ss=state.screenshots[selectedSS];
-    evidenceHtml=`<div class="evidence-panel"><div class="evidence-header">Evidence: ${ss.name}</div><div class="evidence-body"><img src="${ss.dataUrl}" class="evidence-img"><div class="evidence-note">Use this screenshot to inform your responses. Toggle criteria based on what is visible in the UI.</div></div></div>`;
+  if(state.screenshots.length){
+    evidenceHtml=`<div class="evidence-img-grid">${state.screenshots.map(s=>`<img class="evidence-img" src="${s.dataUrl}" alt="${s.name}">`).join('')}</div>`;
   }
 
-  document.getElementById('hContent').innerHTML=`
-    <div class="h-eyebrow">${h.code} of ${H.length}</div>
-    <div class="h-title">${h.name}</div>
-    <div class="h-theory">${h.theory}</div>
-    <div class="h-question">${h.question}</div>
-    ${evidenceHtml}
-    <div class="score-banner">
-      <div class="sb-num" style="color:${col}">${score||'—'}</div>
-      <div class="sb-meta">
-        <div class="sb-label">Current score</div>
-        <div class="sb-bar-bg"><div class="sb-bar-fill" style="width:${barW}%;background:${col}"></div></div>
-        <div class="sb-verdict" style="color:${col}">${verdict}</div>
+  let ctxHtml='';
+  if(state.context.industry||state.context.compliance){
+    if(state.context.industry)ctxHtml+=`<div class="ctx-line"><strong>Industry:</strong> ${state.context.industry}</div>`;
+    if(state.context.compliance)ctxHtml+=`<div class="ctx-line"><strong>Compliance:</strong> ${state.context.compliance}</div>`;
+  }
+
+  document.getElementById('resultsBody').innerHTML=`
+    <div class="res-card">
+      <h3>Score radar — ${state.tool}</h3>
+      <div class="radar-wrap"><canvas id="radarChart"></canvas></div>
+    </div>
+    <div class="res-card">
+      <h3>Heuristic breakdown</h3>
+      ${H.map(h=>{const s=computeHScore(h.code)||0,col=sc(s);return`
+        <div class="score-tbl-row">
+          <div class="st-code">${h.code}</div>
+          <div class="st-name">${h.name}</div>
+          <div class="st-bar-bg"><div class="st-bar-fill" style="width:${s/5*100}%;background:${col}"></div></div>
+          <div class="st-score" style="color:${col}">${s} / 5</div>
+        </div>`}).join('')}
+    </div>
+    <div class="res-card">
+      <h3>Recommendations</h3>
+      <div class="rec-list">${recs}</div>
+    </div>
+    <div class="res-card">
+      <h3>Evidence &amp; context</h3>
+      ${evidenceHtml}
+      ${ctxHtml}
+      ${!evidenceHtml&&!ctxHtml?'<p style="font-size:12px;color:var(--muted)">No screenshots or context provided.</p>':''}
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--stone2)">
+        <div class="ctx-line"><strong>Data source:</strong> ${state.knownMatch?'DQF-M research findings (2024–2026)':'Manual evaluation'}</div>
+        <div class="ctx-line"><strong>Evaluator:</strong> Raja Antony Mandal</div>
+        <div class="ctx-line"><strong>Framework:</strong> DQF-M v1.0 &mdash; Six heuristics, 30-point rubric</div>
       </div>
-    </div>
-    <div class="crit-section-title">Evaluation criteria &mdash; toggle each based on your evidence</div>
-    ${h.criteria.map(c=>{
-      const val=crit[c.id];
-      const wt=c.weight>=3?'High impact':c.weight===2?'Medium impact':'Low impact';
-      const wtcls=c.weight>=3?'hi':'';
-      return`<div class="criterion">
-        <div class="crit-text">
-          <div class="crit-label">${c.label}</div>
-          <div class="crit-desc">${c.desc}</div>
-          <div class="crit-weight ${wtcls}">${'●'.repeat(c.weight)}${'○'.repeat(3-Math.min(c.weight,3))} ${wt}</div>
-        </div>
-        <div class="toggle-group">
-          <button class="tog ${val==='confirmed'?'confirmed':''}" onclick="setCrit('${h.code}','${c.id}','confirmed')">&#10003; Confirmed</button>
-          <button class="tog ${val==='partial'?'partial':''}" onclick="setCrit('${h.code}','${c.id}','partial')">&#126; Partial</button>
-          <button class="tog ${val==='absent'?'absent':''}" onclick="setCrit('${h.code}','${c.id}','absent')">&#10007; Absent</button>
-        </div>
-      </div>`;
-    }).join('')}
-    <div class="notes-area">
-      <label>Notes for ${h.code} <span style="font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
-      <textarea placeholder="Add context, caveats, or specific evidence observed..." onchange="state.notes['${h.code}']=this.value">${state.notes[h.code]||''}</textarea>
     </div>`;
-
-  if(!keepScroll)document.getElementById('hContent').scrollTop=0;
-  const fs=document.getElementById('footerScore');fs.textContent=score||'—';fs.style.color=score?col:'var(--slate-lt)';
-  document.getElementById('btnBack').style.display=idx===0?'none':'';
-  document.getElementById('btnNext').textContent=idx===H.length-1?'View results →':'Next →';
-  renderHNav();updateProg();
-}
-
-function setCrit(hCode,cId,val){
-  state.criteria[hCode][cId]=state.criteria[hCode][cId]===val?null:val;
-  loadH(state.currentH,true);
-}
-function prevH(){if(state.currentH>0)loadH(state.currentH-1);}
-function nextH(){if(state.currentH<H.length-1)loadH(state.currentH+1);else showResults();}
-
-function showResults(){
-  H.forEach(h=>{state.scores[h.code]=computeScore(h.code)||1;});
-  const total=Object.values(state.scores).reduce((a,b)=>a+b,0);
-  const band=getBand(total);
-  document.getElementById('totalScore').textContent=total;
-  document.getElementById('resTitle').textContent=state.tool+' — Evaluation complete';
-  document.getElementById('resSub').textContent=[state.context.industry,state.context.team,state.context.compliance].filter(Boolean).join(' · ')||'DQF-M Framework Evaluation';
-  const bb=document.getElementById('bandBadge');bb.textContent=band.label;bb.style.background=band.bg;bb.style.color=band.color;
-
-  const low=H.filter(h=>state.scores[h.code]<=2),mid=H.filter(h=>state.scores[h.code]===3),high=H.filter(h=>state.scores[h.code]>=4);
-  let recs='';
-  if(low.length)recs+=low.map(h=>`<div class="rec-item gap"><strong>Priority gap — ${h.code} ${h.short}</strong>${h.recs[state.scores[h.code]]||''}</div>`).join('');
-  if(mid.length)recs+=mid.map(h=>`<div class="rec-item config"><strong>Needs configuration — ${h.code} ${h.short}</strong>${h.recs[state.scores[h.code]]||''}</div>`).join('');
-  if(high.length)recs+=high.map(h=>`<div class="rec-item strength"><strong>Strength — ${h.code} ${h.short}</strong>${h.verdicts[state.scores[h.code]]}</div>`).join('');
-
-  let ctx='<div class="ctx-summary">';
-  if(state.context.industry)ctx+=`<span><strong>Industry:</strong> ${state.context.industry}</span>`;
-  if(state.context.team)ctx+=`<span><strong>Team size:</strong> ${state.context.team}</span>`;
-  if(state.context.compliance)ctx+=`<span><strong>Compliance:</strong> ${state.context.compliance}</span>`;
-  if(state.context.current)ctx+=`<span><strong>Current process:</strong> ${state.context.current}</span>`;
-  ctx+='</div>';
-  if(state.context.problem)ctx+=`<div class="ctx-problem">"${state.context.problem}"</div>`;
-
-  document.getElementById('resBody').innerHTML=`
-    <div class="res-card"><h3>Score radar — ${state.tool}</h3><div class="radar-wrap"><canvas id="radarChart"></canvas></div></div>
-    <div class="res-card"><h3>Heuristic breakdown</h3>
-      ${H.map(h=>{const s=state.scores[h.code],c=sc(s);return`<div class="score-table-row"><div class="st-code">${h.code}</div><div class="st-name">${h.name}</div><div class="st-bar-bg"><div class="st-bar-fill" style="width:${s/5*100}%;background:${c}"></div></div><div class="st-score" style="color:${c}">${s}/5</div></div>`;}).join('')}
-    </div>
-    <div class="res-card"><h3>Recommendations</h3><div>${recs||'<div class="rec-item strength"><strong>Excellent</strong>This tool meets enterprise standards across all six heuristics.</div>'}</div></div>
-    <div class="res-card"><h3>Evaluation context</h3>${ctx}</div>`;
 
   showScreen('s-results');
   document.getElementById('progFill').style.width='100%';
-  document.getElementById('stepInd').textContent='Complete';
 
   setTimeout(()=>{
-    const data=H.map(h=>state.scores[h.code]||0);
+    const data=H.map(h=>computeHScore(h.code)||0);
     if(radarChart)radarChart.destroy();
     radarChart=new Chart(document.getElementById('radarChart').getContext('2d'),{
       type:'radar',
-      data:{labels:H.map(h=>h.code),datasets:[{data,backgroundColor:'rgba(192,120,74,.1)',borderColor:'#C0784A',borderWidth:2.5,pointBackgroundColor:data.map(v=>sc(v)),pointBorderColor:'#fff',pointBorderWidth:2,pointRadius:6}]},
-      options:{responsive:true,maintainAspectRatio:false,scales:{r:{min:0,max:5,ticks:{stepSize:1,color:'#9E9890',backdropColor:'transparent',font:{size:10}},grid:{color:'rgba(0,0,0,.06)'},angleLines:{color:'rgba(0,0,0,.06)'},pointLabels:{color:'#1C2B3A',font:{size:12,weight:'600',family:'"Inter",sans-serif'}}}},plugins:{legend:{display:false}}}
+      data:{labels:H.map(h=>h.code),datasets:[{
+        data,backgroundColor:'rgba(192,120,74,.1)',borderColor:'#C0784A',borderWidth:2.5,
+        pointBackgroundColor:data.map(v=>sc(v)),pointBorderColor:'#fff',
+        pointBorderWidth:2,pointRadius:6
+      }]},
+      options:{responsive:true,maintainAspectRatio:false,
+        scales:{r:{min:0,max:5,ticks:{stepSize:1,color:'#9CA3AF',backdropColor:'transparent',font:{size:9}},
+          grid:{color:'rgba(0,0,0,.06)'},angleLines:{color:'rgba(0,0,0,.06)'},
+          pointLabels:{color:'#1C2B3A',font:{size:11,weight:'600',family:'"Inter",sans-serif'}}}},
+        plugins:{legend:{display:false}}}
     });
   },100);
 }
 
+// ── EXPORT PDF ────────────────────────────────────────────────
 function exportPDF(){
-  const{jsPDF}=window.jspdf;const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const{jsPDF}=window.jspdf;
+  const doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
   const W=210,M=20,cw=W-M*2;let y=20;
   doc.setFillColor(28,43,58);doc.rect(0,0,W,32,'F');
-  doc.setTextColor(255,255,255);doc.setFontSize(18);doc.setFont('helvetica','bold');doc.text('DQF-M EVALUATION REPORT',M,14);
-  doc.setFontSize(9);doc.setFont('helvetica','normal');doc.text('Documentation Quality Framework for Manufacturing',M,21);
-  doc.text(state.tool+' · '+new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}),M,27);
-  y=44;
-  const total=Object.values(state.scores).reduce((a,b)=>a+b,0),band=getBand(total);
-  doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(28,43,58);doc.text('TOTAL SCORE',M,y);y+=6;
-  doc.setFontSize(28);doc.setTextColor(192,120,74);doc.text(total+' / 30',M,y);y+=6;
+  doc.setTextColor(255,255,255);doc.setFontSize(16);doc.setFont('helvetica','bold');
+  doc.text('DQF-M EVALUATION REPORT',M,14);
+  doc.setFontSize(9);doc.setFont('helvetica','normal');
+  doc.text(`${state.tool}  ·  ${new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}`,M,21);
+  doc.text('Documentation Quality Framework for Manufacturing  ·  Northeastern University 2026',M,27);
+  y=42;
+  const total=getEstTotal(),band=getBand(total);
+  doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(28,43,58);
+  doc.text('TOTAL SCORE',M,y);y+=6;
+  doc.setFontSize(26);doc.setTextColor(192,120,74);doc.text(`${total} / 30`,M,y);y+=6;
   doc.setFontSize(11);doc.setTextColor(28,43,58);doc.text(band.label.toUpperCase(),M,y);y+=12;
-  const ctx=[state.context.industry,state.context.team,state.context.compliance].filter(Boolean).join(' · ');
-  if(ctx){doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(99,114,133);doc.text(ctx,M,y);y+=10;}
+  if(state.context.industry||state.context.compliance){
+    doc.setFontSize(9);doc.setFont('helvetica','normal');doc.setTextColor(99,114,133);
+    const ctx=[state.context.industry,state.context.compliance].filter(Boolean).join('  ·  ');
+    doc.text(ctx,M,y);y+=10;
+  }
+  doc.setDrawColor(226,230,234);
   doc.setFillColor(244,246,248);doc.rect(M,y,cw,7,'F');
   doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(99,114,133);
-  doc.text('CODE',M+2,y+5);doc.text('HEURISTIC',M+18,y+5);doc.text('SCORE',M+cw-20,y+5);y+=9;
+  doc.text('CODE',M+2,y+5);doc.text('HEURISTIC',M+22,y+5);
+  doc.text('SCORE',M+cw-20,y+5);doc.text('VERDICT',M+cw-65,y+5);y+=9;
   H.forEach((h,i)=>{
-    const s=state.scores[h.code];
+    const s=computeHScore(h.code)||0;
     if(i%2===0){doc.setFillColor(249,250,251);doc.rect(M,y,cw,8,'F');}
     doc.setFontSize(8);doc.setFont('helvetica','bold');doc.setTextColor(192,120,74);doc.text(h.code,M+2,y+5.5);
-    doc.setFont('helvetica','normal');doc.setTextColor(28,43,58);doc.text(h.name,M+18,y+5.5);
+    doc.setFont('helvetica','normal');doc.setTextColor(28,43,58);doc.text(h.name,M+22,y+5.5);
     const col=s>=4?[26,122,74]:s===3?[180,83,9]:[192,57,43];
-    doc.setFont('helvetica','bold');doc.setTextColor(...col);doc.text(s+' / 5',M+cw-18,y+5.5);y+=8;
+    doc.setFont('helvetica','bold');doc.setTextColor(...col);doc.text(`${s}/5`,M+cw-18,y+5.5);
+    doc.setFont('helvetica','normal');doc.setTextColor(28,43,58);
+    const v=(h.verdicts[s]||'').split('—')[0].trim().substring(0,35);
+    doc.text(v,M+cw-63,y+5.5);y+=8;
   });
   y+=8;
-  if(y>240){doc.addPage();y=20;}
-  doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(28,43,58);doc.text('RECOMMENDATIONS',M,y);y+=8;
+  if(y>230){doc.addPage();y=20;}
+  doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(28,43,58);
+  doc.text('RECOMMENDATIONS',M,y);y+=8;
   H.forEach(h=>{
-    const s=state.scores[h.code],rec=h.recs[s];if(!rec)return;
-    if(y>250){doc.addPage();y=20;}
+    const s=computeHScore(h.code)||0,rec=h.recs[s];
+    if(!rec)return;
+    if(y>255){doc.addPage();y=20;}
     const col=s<=2?[192,57,43]:s===3?[180,83,9]:[26,122,74];
-    doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(...col);doc.text(h.code+' '+h.short+' ('+s+'/5)',M,y);y+=5;
+    doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(...col);
+    doc.text(`${h.code} ${h.short}  (${s}/5)`,M,y);y+=5;
     doc.setFont('helvetica','normal');doc.setTextColor(28,43,58);
-    doc.splitTextToSize(rec,cw).forEach(l=>{if(y>270){doc.addPage();y=20;}doc.text(l,M,y);y+=4.5;});y+=4;
+    const lines=doc.splitTextToSize(rec,cw);
+    lines.forEach(l=>{if(y>270){doc.addPage();y=20;}doc.text(l,M,y);y+=4.5;});
+    y+=4;
   });
-  const hasNotes=Object.entries(state.notes).some(([,v])=>v.trim());
-  if(hasNotes){
-    if(y>240){doc.addPage();y=20;}
-    doc.setFontSize(11);doc.setFont('helvetica','bold');doc.setTextColor(28,43,58);doc.text('EVALUATOR NOTES',M,y);y+=8;
-    Object.entries(state.notes).forEach(([code,note])=>{
-      if(!note.trim())return;if(y>260){doc.addPage();y=20;}
-      doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(99,114,133);doc.text(code,M,y);y+=5;
-      doc.setFont('helvetica','normal');doc.setTextColor(28,43,58);
-      doc.splitTextToSize(note,cw).forEach(l=>{if(y>270){doc.addPage();y=20;}doc.text(l,M,y);y+=4.5;});y+=4;
-    });
-  }
   const pages=doc.getNumberOfPages();
-  for(let i=1;i<=pages;i++){doc.setPage(i);doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(155,155,155);doc.text('Raja Antony Mandal · MS Digital Media & Communication · Northeastern University 2026 · DQF-M Framework',M,290);doc.text('Page '+i+' of '+pages,W-M,290,{align:'right'});}
-  doc.save('DQF-M_'+state.tool.replace(/\s+/g,'_')+'_'+new Date().toISOString().slice(0,10)+'.pdf');
+  for(let i=1;i<=pages;i++){
+    doc.setPage(i);doc.setFontSize(7);doc.setFont('helvetica','normal');doc.setTextColor(155,155,155);
+    doc.text('Raja Antony Mandal  ·  MS Digital Media & Communication  ·  Northeastern University 2026  ·  DQF-M Framework',M,290);
+    doc.text(`Page ${i} of ${pages}`,W-M,290,{align:'right'});
+  }
+  doc.save(`DQF-M_${state.tool.replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.pdf`);
 }
 
-function restart(){
-  state={tool:'',context:{},screenshots:[],currentH:0,criteria:{},notes:{},scores:{}};
-  H.forEach(h=>{state.criteria[h.code]={};h.criteria.forEach(c=>state.criteria[h.code][c.id]=null);state.notes[h.code]='';});
-  selectedSS=null;if(radarChart){radarChart.destroy();radarChart=null;}
-  document.getElementById('tool-name').value='';document.getElementById('startBtn').disabled=true;
-  document.getElementById('toolChip').classList.remove('show');document.getElementById('previewGrid').innerHTML='';
-  document.getElementById('progFill').style.width='0%';document.getElementById('stepInd').textContent='';
-  ['ctx-industry','ctx-team','ctx-current','ctx-compliance'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('ctx-problem').value='';showScreen('s-welcome');
+// ── NAVIGATION ────────────────────────────────────────────────
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
 }
+function goBack(){showScreen('s-entry');document.getElementById('progFill').style.width='0%';}
+function restart(){
+  state={tool:'',context:{},screenshots:[],criteria:{},source:{},knownMatch:null};
+  H.forEach(h=>{
+    state.criteria[h.code]={};state.source[h.code]={};
+    h.criteria.forEach(c=>{state.criteria[h.code][c.id]=null;state.source[h.code][c.id]='default';});
+  });
+  if(radarChart){radarChart.destroy();radarChart=null;}
+  document.getElementById('toolInput').value='';
+  document.getElementById('ctaBtn').disabled=true;
+  document.getElementById('autofillNotice').classList.remove('show');
+  document.getElementById('previewGrid').innerHTML='';
+  document.getElementById('toolChip').classList.remove('show');
+  document.getElementById('progFill').style.width='0%';
+  document.querySelectorAll('.known-chip').forEach(c=>c.classList.remove('selected'));
+  ['ctx-industry','ctx-compliance'].forEach(id=>document.getElementById(id).value='');
+  showScreen('s-entry');
+}
+
+renderKnownChips();
 </script>
 </body>
 </html>
